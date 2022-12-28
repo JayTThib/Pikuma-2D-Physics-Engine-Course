@@ -1,1 +1,1 @@
-# 2D Physics Engine
+A 2D physics engine using SDL.

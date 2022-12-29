@@ -1,4 +1,5 @@
 #include "Body.h"
+#include <math.h>
 #include <iostream>
 
 Body::Body(const Shape& shape, float x, float y, float mass) {
@@ -33,7 +34,16 @@ Body::~Body() {
 	delete shape;
 }
 
+bool Body::IsStatic() const {
+	const float epsilon = 0.005f;
+	return fabs(inverseMass) < epsilon;//could be improved - https://floating-point-gui.de/errors/comparison/
+}
+
 void Body::IntegrateLinear(float deltaTime) {
+	if (IsStatic()) {
+		return;
+	}
+
 	acceleration = sumForces * inverseMass;
 	velocity += acceleration * deltaTime;
 	position += velocity * deltaTime;
@@ -41,6 +51,10 @@ void Body::IntegrateLinear(float deltaTime) {
 }
 
 void Body::IntegrateAngular(float deltaTime) {
+	if (IsStatic()) {
+		return;
+	}
+
 	angularAcceleration = sumTorque * inverseRotationalInertia;
 	angularVelocity += angularAcceleration * deltaTime;
 	rotation += angularVelocity * deltaTime;

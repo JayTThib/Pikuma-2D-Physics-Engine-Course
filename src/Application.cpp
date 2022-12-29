@@ -2,6 +2,7 @@
 #include "./Physics/Constants.h"
 #include "./Physics/Force.h"
 #include "./Physics/CollisionDetection.h"
+#include "./Physics/Contact.h"
 
 bool Application::IsRunning() {
     return running;
@@ -13,10 +14,8 @@ bool Application::IsRunning() {
 void Application::Setup() {
     running = Graphics::OpenWindow();
 
-    Body* bigBall = new Body(CircleShape(100), 100, 100, 1.0f);
+    Body* bigBall = new Body(CircleShape(200), Graphics::Width() / 2.0f, Graphics::Height() / 2.0f, 0.0f);
     bodies.push_back(bigBall);
-    Body* smallBall = new Body(CircleShape(50), 500, 100, 1.0f);
-    bodies.push_back(smallBall);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,13 +62,20 @@ void Application::Input() {
                 }
                 break;
 
+            case SDL_MOUSEMOTION:
+                /*
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                bodies[0]->position.x = x;
+                bodies[0]->position.y = y;
+                */
+                break;
+
             case SDL_MOUSEBUTTONDOWN:
-                if (event.button.button == SDL_BUTTON_LEFT) {
-                    //int x, y;
-                    //SDL_GetMouseState(&x, &y);
-                    //Body* particle = new Body(x, y, 1.0);
-                    //bodies.push_back(particle);
-                }
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                Body* smallBall = new Body(CircleShape(20), x, y, 1.0);
+                bodies.push_back(smallBall);
                 break;
         }
     }
@@ -79,6 +85,8 @@ void Application::Input() {
 // Update function (called several times per second to update objects)
 ///////////////////////////////////////////////////////////////////////////////
 void Application::Update() {
+    Graphics::ClearScreen(0xFF056263);
+
     //Wait some time until it reaches the target frame time in milliseconds.
     static int timePreviousFrame;
     int timeToWait = MILLISECONDS_PER_FRAME - (SDL_GetTicks() - timePreviousFrame);
@@ -97,9 +105,9 @@ void Application::Update() {
 
     //Apply forces
     for (auto body : bodies) {
-        Vec2 weight = Vec2(0.0f, body->mass * 9.8f * PIXELS_PER_METER);
-        body->AddForce(weight);
-        body->AddForce(pushForce);
+        //Vec2 weight = Vec2(0.0f, body->mass * 9.8f * PIXELS_PER_METER);
+        //body->AddForce(weight);
+        //body->AddForce(pushForce);
         //float torque = 800;
         //body->AddTorque(torque);
     }
@@ -109,21 +117,32 @@ void Application::Update() {
         body->Update(deltaTime);
     }
     
+    //Reset collision flag for all bodies
+    for (auto& body : bodies) {
+        body->isColliding = false;
+    }
+
     //Check all rigidbodies with the other rigidbodies for collision
     for (int i = 0; i <= bodies.size() - 1; i++) {
         for (int j = i + 1; j < bodies.size(); j++) {
             Body* bodyA = bodies[i];
             Body* bodyB = bodies[j];
-            bodyA->isColliding = false;
-            bodyB->isColliding = false;
-            if (CollisionDetection::IsColliding(bodyA, bodyB)) {
+            Contact contact;
+            if (CollisionDetection::IsColliding(bodyA, bodyB, contact)) {
+                contact.ResolvePenetration();
+
+                //Draw debug info
+                Graphics::DrawFillCircle(contact.start.x, contact.start.y, 3, 0xFFFF00FF);
+                Graphics::DrawFillCircle(contact.end.x, contact.end.y, 3, 0xFFFF00FF);
+                Graphics::DrawLine(contact.start.x, contact.start.y, contact.start.x + contact.normal.x * 15, contact.start.y + contact.normal.y  * 15, 0xFFFF00FF);
+
                 bodyA->isColliding = true;
                 bodyB->isColliding = true;
             }
         }
     }
 
-    //collisions here
+    //Wall collisions here
     for (auto body : bodies) {
         if (body->shape->GetType() == CIRCLE) {
             CircleShape* circleShape = (CircleShape*)body->shape;
@@ -152,14 +171,14 @@ void Application::Update() {
 // Render function (called several times per second to draw objects)
 ///////////////////////////////////////////////////////////////////////////////
 void Application::Render() {
-    Graphics::ClearScreen(0xFF056263);
+    
 
     for (auto body : bodies) {
         Uint32 color = body->isColliding ? 0xFF0000FF : 0xFFFFFFFF;
         switch (body->shape->GetType()) {
             case BOX: {
                 BoxShape* boxShape = (BoxShape*)body->shape;
-                Graphics::DrawPolygon(body->position.x, body->position.y, boxShape->worldVertices, color);
+                Graphics::DrawPolygon(body->position.x, body->position.y, boxShape->worldVertices, 0xFFFFFFFF);
                 }
                 break;
 

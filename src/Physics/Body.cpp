@@ -1,7 +1,7 @@
-#include "Particle.h"
+#include "Body.h"
 #include <iostream>
 
-Particle::Particle(float x, float y, float mass) {
+Body::Body(float x, float y, float mass) {
 	this->position = Vec2(x, y);
 	this->mass = mass;
 	if (mass != 0.0) {
@@ -13,22 +13,21 @@ Particle::Particle(float x, float y, float mass) {
 	
 }
 
-Particle::~Particle() {
+Body::~Body() {
 	
 }
 
-void Particle::Integrate(float deltaTime) {
-	//Integrate using the Euler method
+void Body::Integrate(float deltaTime) {
 	acceleration = sumForces * invMass;
 	velocity += acceleration * deltaTime;
 	position += velocity * deltaTime;
 	ClearForces();
 }
 
-void Particle::AddForce(const Vec2& force) {
+void Body::AddForce(const Vec2& force) {
 	sumForces += force;
 }
 
-void Particle::ClearForces() {
+void Body::ClearForces() {
 	sumForces = Vec2(0.0f, 0.0f);
 }

@@ -2,14 +2,14 @@
 #define FORCE_H
 
 #include "./Vec2.h"
-#include "./Particle.h"
+#include "./Body.h"
 
 struct Force {
-	static Vec2 GenerateDragForce(const Particle& particle, float k);
-	static Vec2 GenerateFrictionForce(const Particle& particle, float k);
-	static Vec2 GenerateSpringForce(const Particle& particle, Vec2 anchor, float restLength, float k);
-	static Vec2 GenerateSpringForce(const Particle& particleA, const Particle& particleB, float restLength, float k);
-	static Vec2 GenerateGravitationalForce(const Particle& particleA, const Particle& particleB, float grav, float minDistance, float maxDistance);
+	static Vec2 GenerateDragForce(const Body& body, float k);
+	static Vec2 GenerateFrictionForce(const Body& body, float k);
+	static Vec2 GenerateSpringForce(const Body& body, Vec2 anchor, float restLength, float k);
+	static Vec2 GenerateSpringForce(const Body& bodyA, const Body& bodyB, float restLength, float k);
+	static Vec2 GenerateGravitationalForce(const Body& bodyA, const Body& bodyB, float grav, float minDistance, float maxDistance);
 };
 
 #endif

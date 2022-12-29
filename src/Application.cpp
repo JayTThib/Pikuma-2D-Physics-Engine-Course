@@ -12,13 +12,13 @@ bool Application::IsRunning() {
 void Application::Setup() {
     running = Graphics::OpenWindow();
 
-    Particle* smallBall = new Particle(50, 100, 1.0f);
+    Body* smallBall = new Body(50, 100, 1.0f);
     smallBall->radius = 4;
-    particles.push_back(smallBall);
+    bodies.push_back(smallBall);
     
-    Particle* bigBall = new Particle(200, 100, 3.0f);
+    Body* bigBall = new Body(200, 100, 3.0f);
     bigBall->radius = 12;
-    particles.push_back(bigBall);
+    bodies.push_back(bigBall);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,9 +69,9 @@ void Application::Input() {
                 if (event.button.button == SDL_BUTTON_LEFT) {
                     int x, y;
                     SDL_GetMouseState(&x, &y);
-                    Particle* particle = new Particle(x, y, 1.0);
+                    Body* particle = new Body(x, y, 1.0);
                     particle->radius = 5;
-                    particles.push_back(particle);
+                    bodies.push_back(particle);
                 }
                 break;
         }
@@ -100,18 +100,18 @@ void Application::Update() {
     timePreviousFrame = SDL_GetTicks();
 
     
-    for (auto particle : particles) {
-        particle->AddForce(pushForce);
+    for (auto body : bodies) {
+        body->AddForce(pushForce);
     }
 
-    Vec2 attraction = Force::GenerateGravitationalForce(*particles[0], *particles[1], 5000, 5, 200);
-    particles[0]->AddForce(attraction);
-    particles[1]->AddForce(-attraction);
+    Vec2 attraction = Force::GenerateGravitationalForce(*bodies[0], *bodies[1], 5000, 5, 200);
+    bodies[0]->AddForce(attraction);
+    bodies[1]->AddForce(-attraction);
 
 
     //Integrate the accel and velocity of the new position
-    for (auto particle : particles) {
-        particle->Integrate(deltaTime);
+    for (auto body : bodies) {
+        body->Integrate(deltaTime);
     }
     
     //collisions here
@@ -123,8 +123,8 @@ void Application::Update() {
 void Application::Render() {
     Graphics::ClearScreen(0xFF056263);
 
-    for (auto particle : particles) {
-        Graphics::DrawFillCircle(particle->position.x, particle->position.y, particle->radius, 0xFFFFFFFF);
+    for (auto body : bodies) {
+        Graphics::DrawFillCircle(body->position.x, body->position.y, body->radius, 0xFFFFFFFF);
     }
     
     Graphics::RenderFrame();
@@ -134,8 +134,8 @@ void Application::Render() {
 // Destroy function to delete objects and close the window
 ///////////////////////////////////////////////////////////////////////////////
 void Application::Destroy() {
-    for (auto particle : particles) {
-        delete particle;
+    for (auto body : bodies) {
+        delete body;
     }
     Graphics::CloseWindow();
 }

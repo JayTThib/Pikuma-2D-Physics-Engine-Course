@@ -13,13 +13,14 @@ struct Particle {
 	Vec2 sumForces;
 
 	float mass;
+	float invMass;
 
 	Particle(float x, float y, float mass);
 	~Particle();
 
-	void Integrate(float deltaTime);
 	void AddForce(const Vec2& force);
 	void ClearForces();
+	void Integrate(float deltaTime);
 };
 
 #endif

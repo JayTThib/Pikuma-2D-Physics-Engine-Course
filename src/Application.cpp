@@ -19,11 +19,6 @@ void Application::Setup() {
     Particle* bigBall = new Particle(200, 100, 3.0f);
     bigBall->radius = 12;
     particles.push_back(bigBall);
-    
-    liquid.x = 0;
-    liquid.y = Graphics::Height() / 2;
-    liquid.w = Graphics::Width();
-    liquid.h = Graphics::Height() / 2;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -107,15 +102,12 @@ void Application::Update() {
     
     for (auto particle : particles) {
         particle->AddForce(pushForce);
-
-        Vec2 friction = Force::GenerateFrictionForce(*particle, 10.0f * PIXELS_PER_METER);
-        particle->AddForce(friction);
-
-        if (particle->position.y >= liquid.y) {
-            Vec2 drag = Force::GenerateDragForce(*particle, 0.03f);
-            particle->AddForce(drag);
-        }
     }
+
+    Vec2 attraction = Force::GenerateGravitationalForce(*particles[0], *particles[1], 5000, 5, 200);
+    particles[0]->AddForce(attraction);
+    particles[1]->AddForce(-attraction);
+
 
     //Integrate the accel and velocity of the new position
     for (auto particle : particles) {
@@ -130,8 +122,6 @@ void Application::Update() {
 ///////////////////////////////////////////////////////////////////////////////
 void Application::Render() {
     Graphics::ClearScreen(0xFF056263);
-
-    Graphics::DrawFillRect(liquid.x + liquid.w / 2, liquid.y + liquid.h / 2, liquid.w, liquid.h, 0xFF6E3713);
 
     for (auto particle : particles) {
         Graphics::DrawFillCircle(particle->position.x, particle->position.y, particle->radius, 0xFFFFFFFF);

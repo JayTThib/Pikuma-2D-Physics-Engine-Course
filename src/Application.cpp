@@ -106,12 +106,13 @@ void Application::Update() {
 
     
     for (auto particle : particles) {
-        Vec2 weight = Vec2(0.0f, particle->mass * 9.8f * PIXELS_PER_METER);
-        particle->AddForce(weight);
         particle->AddForce(pushForce);
 
+        Vec2 friction = Force::GenerateFrictionForce(*particle, 10.0f * PIXELS_PER_METER);
+        particle->AddForce(friction);
+
         if (particle->position.y >= liquid.y) {
-            Vec2 drag = Force::GenerateDragForce(*particle, 0.01f);
+            Vec2 drag = Force::GenerateDragForce(*particle, 0.03f);
             particle->AddForce(drag);
         }
     }

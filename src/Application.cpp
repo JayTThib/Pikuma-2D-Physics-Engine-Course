@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "./Physics/Constants.h"
 #include "./Physics/Force.h"
+#include "./Physics/CollisionDetection.h"
 
 bool Application::IsRunning() {
     return running;
@@ -12,8 +13,10 @@ bool Application::IsRunning() {
 void Application::Setup() {
     running = Graphics::OpenWindow();
 
-    Body* box = new Body(BoxShape(200, 100), Graphics::Width() / 2.0f, Graphics::Height() / 2.0f, 1.0f);
-    bodies.push_back(box);
+    Body* bigBall = new Body(CircleShape(100), 100, 100, 1.0f);
+    bodies.push_back(bigBall);
+    Body* smallBall = new Body(CircleShape(50), 500, 100, 1.0f);
+    bodies.push_back(smallBall);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -94,11 +97,11 @@ void Application::Update() {
 
     //Apply forces
     for (auto body : bodies) {
-        //Vec2 weight = Vec2(0.0f, body->mass * 9.8f * PIXELS_PER_METER);
-        //body->AddForce(weight);
+        Vec2 weight = Vec2(0.0f, body->mass * 9.8f * PIXELS_PER_METER);
+        body->AddForce(weight);
         body->AddForce(pushForce);
-        float torque = 800;
-        body->AddTorque(torque);
+        //float torque = 800;
+        //body->AddTorque(torque);
     }
 
     //Integrate the accel and velocity of the new position
@@ -106,6 +109,20 @@ void Application::Update() {
         body->Update(deltaTime);
     }
     
+    //Check all rigidbodies with the other rigidbodies for collision
+    for (int i = 0; i <= bodies.size() - 1; i++) {
+        for (int j = i + 1; j < bodies.size(); j++) {
+            Body* bodyA = bodies[i];
+            Body* bodyB = bodies[j];
+            bodyA->isColliding = false;
+            bodyB->isColliding = false;
+            if (CollisionDetection::IsColliding(bodyA, bodyB)) {
+                bodyA->isColliding = true;
+                bodyB->isColliding = true;
+            }
+        }
+    }
+
     //collisions here
     for (auto body : bodies) {
         if (body->shape->GetType() == CIRCLE) {
@@ -138,16 +155,17 @@ void Application::Render() {
     Graphics::ClearScreen(0xFF056263);
 
     for (auto body : bodies) {
+        Uint32 color = body->isColliding ? 0xFF0000FF : 0xFFFFFFFF;
         switch (body->shape->GetType()) {
             case BOX: {
                 BoxShape* boxShape = (BoxShape*)body->shape;
-                Graphics::DrawPolygon(body->position.x, body->position.y, boxShape->worldVertices, 0xFFFFFFFF);
+                Graphics::DrawPolygon(body->position.x, body->position.y, boxShape->worldVertices, color);
                 }
                 break;
 
             case CIRCLE: {
                 CircleShape* circleShape = (CircleShape*)body->shape;
-                Graphics::DrawCircle(body->position.x, body->position.y, circleShape->radius, body->rotation, 0xFFFFFFFF);
+                Graphics::DrawCircle(body->position.x, body->position.y, circleShape->radius, body->rotation, color);
                 }
                 break;
 

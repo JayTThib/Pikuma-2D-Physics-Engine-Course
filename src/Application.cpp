@@ -12,11 +12,8 @@ bool Application::IsRunning() {
 void Application::Setup() {
     running = Graphics::OpenWindow();
 
-    Body* smallBall = new Body(50, 100, 1.0f);
-    bodies.push_back(smallBall);
-    
-    Body* bigBall = new Body(200, 100, 3.0f);
-    bodies.push_back(bigBall);
+    Body* box = new Body(BoxShape(200, 100), Graphics::Width() / 2.0f, Graphics::Height() / 2.0f, 1.0f);
+    bodies.push_back(box);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,10 +62,10 @@ void Application::Input() {
 
             case SDL_MOUSEBUTTONDOWN:
                 if (event.button.button == SDL_BUTTON_LEFT) {
-                    int x, y;
-                    SDL_GetMouseState(&x, &y);
-                    Body* particle = new Body(x, y, 1.0);
-                    bodies.push_back(particle);
+                    //int x, y;
+                    //SDL_GetMouseState(&x, &y);
+                    //Body* particle = new Body(x, y, 1.0);
+                    //bodies.push_back(particle);
                 }
                 break;
         }
@@ -88,7 +85,6 @@ void Application::Update() {
 
     //Calc deltaTime in seconds
     float deltaTime = (SDL_GetTicks() - timePreviousFrame) / 1000.0f;
-
     if (deltaTime > 0.016f) {
         deltaTime = 0.016f;
     }
@@ -98,15 +94,41 @@ void Application::Update() {
 
     //Apply forces
     for (auto body : bodies) {
+        //Vec2 weight = Vec2(0.0f, body->mass * 9.8f * PIXELS_PER_METER);
+        //body->AddForce(weight);
         body->AddForce(pushForce);
+        float torque = 800;
+        body->AddTorque(torque);
     }
 
     //Integrate the accel and velocity of the new position
     for (auto body : bodies) {
-        body->Integrate(deltaTime);
+        body->Update(deltaTime);
     }
     
     //collisions here
+    for (auto body : bodies) {
+        if (body->shape->GetType() == CIRCLE) {
+            CircleShape* circleShape = (CircleShape*)body->shape;
+            if (body->position.x - circleShape->radius <= 0) {
+                body->position.x = circleShape->radius;
+                body->velocity.x *= -0.9f;
+            }
+            else if (body->position.x + circleShape->radius >= Graphics::Width()) {
+                body->position.x = Graphics::Width() - circleShape->radius;
+                body->velocity.x *= -0.9f;
+            }
+
+            if (body->position.y - circleShape->radius <= 0) {
+                body->position.y = circleShape->radius;
+                body->velocity.y *= -0.9f;
+            }
+            else if (body->position.y + circleShape->radius >= Graphics::Height()) {
+                body->position.y = Graphics::Height() - circleShape->radius;
+                body->velocity.y *= -0.9f;
+            }
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -116,9 +138,24 @@ void Application::Render() {
     Graphics::ClearScreen(0xFF056263);
 
     for (auto body : bodies) {
-        Graphics::DrawFillCircle(body->position.x, body->position.y, 4, 0xFFFFFFFF);
+        switch (body->shape->GetType()) {
+            case BOX: {
+                BoxShape* boxShape = (BoxShape*)body->shape;
+                Graphics::DrawPolygon(body->position.x, body->position.y, boxShape->worldVertices, 0xFFFFFFFF);
+                }
+                break;
+
+            case CIRCLE: {
+                CircleShape* circleShape = (CircleShape*)body->shape;
+                Graphics::DrawCircle(body->position.x, body->position.y, circleShape->radius, body->rotation, 0xFFFFFFFF);
+                }
+                break;
+
+            default:
+                break;
+        }
     }
-    
+
     Graphics::RenderFrame();
 }
 

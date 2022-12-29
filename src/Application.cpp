@@ -13,11 +13,9 @@ void Application::Setup() {
     running = Graphics::OpenWindow();
 
     Body* smallBall = new Body(50, 100, 1.0f);
-    smallBall->radius = 4;
     bodies.push_back(smallBall);
     
     Body* bigBall = new Body(200, 100, 3.0f);
-    bigBall->radius = 12;
     bodies.push_back(bigBall);
 }
 
@@ -70,7 +68,6 @@ void Application::Input() {
                     int x, y;
                     SDL_GetMouseState(&x, &y);
                     Body* particle = new Body(x, y, 1.0);
-                    particle->radius = 5;
                     bodies.push_back(particle);
                 }
                 break;
@@ -99,15 +96,10 @@ void Application::Update() {
     //Set the time of the current frame to be used in the next one.
     timePreviousFrame = SDL_GetTicks();
 
-    
+    //Apply forces
     for (auto body : bodies) {
         body->AddForce(pushForce);
     }
-
-    Vec2 attraction = Force::GenerateGravitationalForce(*bodies[0], *bodies[1], 5000, 5, 200);
-    bodies[0]->AddForce(attraction);
-    bodies[1]->AddForce(-attraction);
-
 
     //Integrate the accel and velocity of the new position
     for (auto body : bodies) {
@@ -124,7 +116,7 @@ void Application::Render() {
     Graphics::ClearScreen(0xFF056263);
 
     for (auto body : bodies) {
-        Graphics::DrawFillCircle(body->position.x, body->position.y, body->radius, 0xFFFFFFFF);
+        Graphics::DrawFillCircle(body->position.x, body->position.y, 4, 0xFFFFFFFF);
     }
     
     Graphics::RenderFrame();

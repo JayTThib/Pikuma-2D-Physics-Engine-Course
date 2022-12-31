@@ -1,4 +1,5 @@
 #include "Shape.h"
+#include <limits>
 
 CircleShape::CircleShape(float radius) {
 	this->radius = radius;
@@ -41,6 +42,31 @@ Shape* PolygonShape::Clone() const {
 float PolygonShape::GetMomentOfInertia() const {
 	//TODO
 	return 0.0f;
+}
+
+Vec2 PolygonShape::EdgeAt(int index) const {
+	int nextVertex = (index + 1) % worldVertices.size();//Avoid going out of bounds
+	return worldVertices[nextVertex] - worldVertices[index];
+}
+
+float PolygonShape::FindMinSeparation(const PolygonShape* other) const {
+	float separation = std::numeric_limits<float>::lowest();
+
+	for (int aIndex = 0; aIndex < this->worldVertices.size(); aIndex++) {
+		Vec2 vertexA = this->worldVertices[aIndex];
+		Vec2 normal = this->EdgeAt(aIndex).Normal();
+
+		float minSeparation = std::numeric_limits<float>::max();
+
+		for (int bIndex = 0; bIndex < other->worldVertices.size(); bIndex++) {
+			Vec2 vertexB = other->worldVertices[bIndex];
+			minSeparation = std::min(minSeparation, (vertexB - vertexA).Dot(normal));//Project vertex b onto the normal axis 
+		}
+
+		separation = std::max(separation, minSeparation);
+	}
+
+	return separation;
 }
 
 void PolygonShape::UpdateVertices(float angle, const Vec2& position) {

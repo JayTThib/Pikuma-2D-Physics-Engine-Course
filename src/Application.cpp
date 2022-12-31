@@ -14,8 +14,12 @@ bool Application::IsRunning() {
 void Application::Setup() {
     running = Graphics::OpenWindow();
 
-    Body* bigBall = new Body(CircleShape(200), Graphics::Width() / 2.0f, Graphics::Height() / 2.0f, 0.0f);
-    bodies.push_back(bigBall);
+    Body* boxA = new Body(BoxShape(200, 200), Graphics::Width() / 2.0f, Graphics::Height() / 2.0f, 1.0f);
+    Body* boxB = new Body(BoxShape(200, 200), Graphics::Width() / 2.0f, Graphics::Height() / 2.0f, 1.0f);
+    boxA->angularVelocity = 0.4f;
+    boxB->angularVelocity = 0.1f;
+    bodies.push_back(boxA);
+    bodies.push_back(boxB);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,6 +33,7 @@ void Application::Input() {
                 running = false;
                 break;
 
+            /*
             case SDL_KEYDOWN:
                 if (event.key.keysym.sym == SDLK_ESCAPE) {
                     running = false;
@@ -61,21 +66,24 @@ void Application::Input() {
                     pushForce.x = 0;
                 }
                 break;
+            */
 
             case SDL_MOUSEMOTION:
-                /*
                 int x, y;
                 SDL_GetMouseState(&x, &y);
                 bodies[0]->position.x = x;
                 bodies[0]->position.y = y;
-                */
                 break;
 
             case SDL_MOUSEBUTTONDOWN:
+                /*
                 int x, y;
                 SDL_GetMouseState(&x, &y);
-                Body* smallBall = new Body(CircleShape(20), x, y, 1.0);
+                int randNum = 10 + (rand() % 30);
+                Body* smallBall = new Body(CircleShape(randNum), x, y, 1.0f);
+                smallBall->restitution = 0.2f;
                 bodies.push_back(smallBall);
+                */
                 break;
         }
     }
@@ -85,7 +93,7 @@ void Application::Input() {
 // Update function (called several times per second to update objects)
 ///////////////////////////////////////////////////////////////////////////////
 void Application::Update() {
-    Graphics::ClearScreen(0xFF056263);
+    Graphics::ClearScreen(0x00000000);
 
     //Wait some time until it reaches the target frame time in milliseconds.
     static int timePreviousFrame;
@@ -129,7 +137,7 @@ void Application::Update() {
             Body* bodyB = bodies[j];
             Contact contact;
             if (CollisionDetection::IsColliding(bodyA, bodyB, contact)) {
-                contact.ResolvePenetration();
+                //contact.ResolveCollision();//Resolve using impulse method
 
                 //Draw debug info
                 Graphics::DrawFillCircle(contact.start.x, contact.start.y, 3, 0xFFFF00FF);
@@ -178,7 +186,7 @@ void Application::Render() {
         switch (body->shape->GetType()) {
             case BOX: {
                 BoxShape* boxShape = (BoxShape*)body->shape;
-                Graphics::DrawPolygon(body->position.x, body->position.y, boxShape->worldVertices, 0xFFFFFFFF);
+                Graphics::DrawPolygon(body->position.x, body->position.y, boxShape->worldVertices, color);
                 }
                 break;
 

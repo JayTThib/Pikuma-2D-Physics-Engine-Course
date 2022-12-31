@@ -7,8 +7,7 @@
 struct CollisionDetection {
 	static bool IsColliding(Body* bodyA, Body* bodyB, Contact& contact);
 	static bool IsCollidingCircleCircle(Body* bodyA, Body* bodyB, Contact& contact);
-	//static bool IsCollidingPolygonPolygon(Body* bodyA, Body* bodyB);
-	//static bool IsCollidingPolygonCircle(Body* bodyA, Body* bodyB);
+	static bool IsCollidingPolygonPolygon(Body* bodyA, Body* bodyB, Contact& contact);//Uses the Separating Axis Theorem (doesn't work with concave polygons)
 };
 
 #endif

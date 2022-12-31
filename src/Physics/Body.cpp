@@ -12,7 +12,8 @@ Body::Body(const Shape& shape, float x, float y, float mass) {
 	this->angularAcceleration = 0.0f;
 	this->sumForces = Vec2(0.0f, 0.0f);
 	this->sumTorque = 0.0f;
-	
+	this->restitution = 1.0f;
+
 	this->mass = mass;
 	if (mass != 0.0) {
 		this->inverseMass = 1.0f / mass;
@@ -59,6 +60,14 @@ void Body::IntegrateAngular(float deltaTime) {
 	angularVelocity += angularAcceleration * deltaTime;
 	rotation += angularVelocity * deltaTime;
 	ClearTorque();
+}
+
+void Body::ApplyImpulse(const Vec2& impulse) {
+	if (IsStatic()) {
+		return;
+	}
+
+	velocity += impulse * inverseMass;
 }
 
 void Body::AddForce(const Vec2& force) {

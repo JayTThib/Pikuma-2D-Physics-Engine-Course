@@ -70,6 +70,15 @@ void Body::ApplyImpulse(const Vec2& impulse) {
 	velocity += impulse * inverseMass;
 }
 
+void Body::ApplyImpulse(const Vec2& impulse, const Vec2& pointOfImpactDist) {
+	if (IsStatic()) {
+		return;
+	}
+
+	velocity += impulse * inverseMass;
+	angularVelocity += pointOfImpactDist.Cross(impulse) * inverseRotationalInertia;
+}
+
 void Body::AddForce(const Vec2& force) {
 	sumForces += force;
 }

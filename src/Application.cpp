@@ -14,12 +14,14 @@ bool Application::IsRunning() {
 void Application::Setup() {
     running = Graphics::OpenWindow();
 
-    Body* boxA = new Body(BoxShape(200, 200), Graphics::Width() / 2.0f, Graphics::Height() / 2.0f, 1.0f);
-    Body* boxB = new Body(BoxShape(200, 200), Graphics::Width() / 2.0f, Graphics::Height() / 2.0f, 1.0f);
-    boxA->angularVelocity = 0.4f;
-    boxB->angularVelocity = 0.1f;
-    bodies.push_back(boxA);
-    bodies.push_back(boxB);
+    Body* floor = new Body(BoxShape(Graphics::Width() - 50, 50), Graphics::Width() / 2.0f, Graphics::Height() - 50, 0.0f);
+    floor->elasticity = 0.2f;
+    bodies.push_back(floor);
+
+    Body* bigBox = new Body(BoxShape(200, 200), Graphics::Width() / 2.0f, Graphics::Height() / 2.0f, 0.0f);
+    bigBox->rotation = 1.4f;
+    bigBox->elasticity = 0.5f;
+    bodies.push_back(bigBox);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,21 +71,19 @@ void Application::Input() {
             */
 
             case SDL_MOUSEMOTION:
+                /*
                 int x, y;
                 SDL_GetMouseState(&x, &y);
                 bodies[0]->position.x = x;
                 bodies[0]->position.y = y;
+                */
                 break;
 
             case SDL_MOUSEBUTTONDOWN:
-                /*
                 int x, y;
                 SDL_GetMouseState(&x, &y);
-                int randNum = 10 + (rand() % 30);
-                Body* smallBall = new Body(CircleShape(randNum), x, y, 1.0f);
-                smallBall->restitution = 0.2f;
-                bodies.push_back(smallBall);
-                */
+                Body* box = new Body(BoxShape(50, 50), x, y, 1.0f);
+                bodies.push_back(box);
                 break;
         }
     }
@@ -112,21 +112,21 @@ void Application::Update() {
     timePreviousFrame = SDL_GetTicks();
 
     //Apply forces
-    for (auto body : bodies) {
-        //Vec2 weight = Vec2(0.0f, body->mass * 9.8f * PIXELS_PER_METER);
-        //body->AddForce(weight);
+    for (Body* body : bodies) {
+        Vec2 weight = Vec2(0.0f, body->mass * 9.8f * PIXELS_PER_METER);
+        body->AddForce(weight);
         //body->AddForce(pushForce);
         //float torque = 800;
         //body->AddTorque(torque);
     }
 
     //Integrate the accel and velocity of the new position
-    for (auto body : bodies) {
+    for (Body* body : bodies) {
         body->Update(deltaTime);
     }
     
     //Reset collision flag for all bodies
-    for (auto& body : bodies) {
+    for (Body* &body : bodies) {
         body->isColliding = false;
     }
 
@@ -137,7 +137,7 @@ void Application::Update() {
             Body* bodyB = bodies[j];
             Contact contact;
             if (CollisionDetection::IsColliding(bodyA, bodyB, contact)) {
-                //contact.ResolveCollision();//Resolve using impulse method
+                contact.ResolveCollision();//Resolve using impulse method
 
                 //Draw debug info
                 Graphics::DrawFillCircle(contact.start.x, contact.start.y, 3, 0xFFFF00FF);
@@ -151,7 +151,7 @@ void Application::Update() {
     }
 
     //Wall collisions here
-    for (auto body : bodies) {
+    for (Body* body : bodies) {
         if (body->shape->GetType() == CIRCLE) {
             CircleShape* circleShape = (CircleShape*)body->shape;
             if (body->position.x - circleShape->radius <= 0) {
@@ -180,8 +180,7 @@ void Application::Update() {
 ///////////////////////////////////////////////////////////////////////////////
 void Application::Render() {
     
-
-    for (auto body : bodies) {
+    for (Body* body : bodies) {
         Uint32 color = body->isColliding ? 0xFF0000FF : 0xFFFFFFFF;
         switch (body->shape->GetType()) {
             case BOX: {
@@ -208,7 +207,7 @@ void Application::Render() {
 // Destroy function to delete objects and close the window
 ///////////////////////////////////////////////////////////////////////////////
 void Application::Destroy() {
-    for (auto body : bodies) {
+    for (Body* body : bodies) {
         delete body;
     }
     Graphics::CloseWindow();

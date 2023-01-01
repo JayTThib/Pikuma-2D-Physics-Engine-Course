@@ -17,12 +17,12 @@ Vec2 Force::GenerateFrictionForce(const Body& body, float k) {
 	return frictionDirection * k;
 }
 
-Vec2 Force::GenerateGravitationalForce(const Body& bodyA, const Body& bodyB, float grav, float minDistance, float maxDistance) {
-	Vec2 distance = (bodyB.position - bodyA.position);
+Vec2 Force::GenerateGravitationalForce(const Body& body1, const Body& body2, float grav, float minDistance, float maxDistance) {
+	Vec2 distance = (body2.position - body1.position);
 	float distanceSquared = distance.MagnitudeSquared();
 	distanceSquared = std::clamp(distanceSquared, minDistance, maxDistance);
 	Vec2 attractionDirection = distance.UnitVector();
-	float attractionMagnitude = grav * (bodyA.mass * bodyB.mass) / distanceSquared;
+	float attractionMagnitude = grav * (body1.mass * body2.mass) / distanceSquared;
 	return attractionDirection * attractionMagnitude;
 }
 
@@ -34,8 +34,8 @@ Vec2 Force::GenerateSpringForce(const Body& body, Vec2 anchor, float restLength,
 	return springDirection * springMagnitude;
 }
 
-Vec2 Force::GenerateSpringForce(const Body& bodyA, const Body& bodyB, float restLength, float k) {
-	Vec2 distance = bodyA.position - bodyB.position;
+Vec2 Force::GenerateSpringForce(const Body& body1, const Body& body2, float restLength, float k) {
+	Vec2 distance = body1.position - body2.position;
 	float displacement = distance.Magnitude() - restLength;
 	Vec2 springDirection = distance.UnitVector();
 	float springMagnitude = -k * displacement;

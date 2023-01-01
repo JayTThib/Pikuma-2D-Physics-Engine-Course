@@ -37,11 +37,10 @@ struct PolygonShape : public Shape {
 	ShapeType GetType() const override;
 	Shape* Clone() const override;
 	Vec2 EdgeAt(int index) const;
-	float FindMinSeparation(const PolygonShape* other) const;
+	float FindMinSeparation(const PolygonShape* other, Vec2& bestAxisOfPenetration, Vec2& vertexInOtherPolyWithMinProjection) const;
 	float GetMomentOfInertia() const override;
 
-	//Function to rotate and translate the polygon vertices from "local space" to "world space"
-	void UpdateVertices(float angle, const Vec2& position);
+	void UpdateVertices(float angle, const Vec2& position);////Rotate and translate the polygon vertices from local space to world space.
 };
 
 struct BoxShape : public PolygonShape {

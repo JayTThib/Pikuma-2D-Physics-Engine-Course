@@ -5,9 +5,9 @@
 #include "Contact.h"
 
 struct CollisionDetection {
-	static bool IsColliding(Body* bodyA, Body* bodyB, Contact& contact);
-	static bool IsCollidingCircleCircle(Body* bodyA, Body* bodyB, Contact& contact);
-	static bool IsCollidingPolygonPolygon(Body* bodyA, Body* bodyB, Contact& contact);//Uses the Separating Axis Theorem (doesn't work with concave polygons)
+	static bool IsColliding(Body* body1, Body* body2, Contact& contact);
+	static bool IsCollidingCircleCircle(Body* body1, Body* body2, Contact& contact);
+	static bool IsCollidingPolygonPolygon(Body* body1, Body* body2, Contact& contact);//Uses the Separating Axis Theorem (doesn't work with concave polygons)
 };
 
 #endif

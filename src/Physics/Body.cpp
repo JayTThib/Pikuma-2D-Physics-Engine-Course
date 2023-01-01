@@ -12,7 +12,7 @@ Body::Body(const Shape& shape, float x, float y, float mass) {
 	this->angularAcceleration = 0.0f;
 	this->sumForces = Vec2(0.0f, 0.0f);
 	this->sumTorque = 0.0f;
-	this->restitution = 1.0f;
+	this->elasticity = 1.0f;
 
 	this->mass = mass;
 	if (mass != 0.0) {

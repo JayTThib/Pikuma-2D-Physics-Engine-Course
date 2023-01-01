@@ -5,8 +5,8 @@
 #include "Body.h"
 
 struct Contact {
-	Body* bodyA;
-	Body* bodyB;
+	Body* body1;
+	Body* body2;
 
 	Vec2 start;
 	Vec2 end;

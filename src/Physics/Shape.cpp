@@ -45,31 +45,43 @@ float PolygonShape::GetMomentOfInertia() const {
 }
 
 Vec2 PolygonShape::EdgeAt(int index) const {
-	int nextVertex = (index + 1) % worldVertices.size();//Avoid going out of bounds
+	int nextVertex = (index + 1) % worldVertices.size();//Avoids going out of bounds
 	return worldVertices[nextVertex] - worldVertices[index];
 }
 
-float PolygonShape::FindMinSeparation(const PolygonShape* other) const {
+float PolygonShape::FindMinSeparation(const PolygonShape* other, Vec2& bestAxisOfPenetration, Vec2& vertexInOtherPolyWithMinProjection) const {
 	float separation = std::numeric_limits<float>::lowest();
 
-	for (int aIndex = 0; aIndex < this->worldVertices.size(); aIndex++) {
-		Vec2 vertexA = this->worldVertices[aIndex];
-		Vec2 normal = this->EdgeAt(aIndex).Normal();
-
+	for (int poly1Index = 0; poly1Index < this->worldVertices.size(); poly1Index++) {
+		Vec2 vertex1 = this->worldVertices[poly1Index];
+		Vec2 normal = this->EdgeAt(poly1Index).Normal();
 		float minSeparation = std::numeric_limits<float>::max();
+		Vec2 minVertex;
 
-		for (int bIndex = 0; bIndex < other->worldVertices.size(); bIndex++) {
-			Vec2 vertexB = other->worldVertices[bIndex];
-			minSeparation = std::min(minSeparation, (vertexB - vertexA).Dot(normal));//Project vertex b onto the normal axis 
+		for (int poly2Index = 0; poly2Index < other->worldVertices.size(); poly2Index++) {
+			Vec2 vertex2 = other->worldVertices[poly2Index];
+			float projection = (vertex2 - vertex1).Dot(normal);
+
+			if (projection < minSeparation) {
+				minSeparation = projection;
+				minVertex = vertex2;
+			}
+
+			minSeparation = std::min(minSeparation, (vertex2 - vertex1).Dot(normal));//Project vertex b onto the normal axis 
 		}
 
-		separation = std::max(separation, minSeparation);
+		if (minSeparation > separation) {
+			separation = minSeparation;
+			bestAxisOfPenetration = this->EdgeAt(poly1Index);
+			vertexInOtherPolyWithMinProjection = minVertex;
+		}
 	}
 
 	return separation;
 }
 
 void PolygonShape::UpdateVertices(float angle, const Vec2& position) {
+	//Rotate and translate the polygon vertices from local space to world space.
 	for (int i = 0; i < localVertices.size(); i++) {
 		worldVertices[i] = localVertices[i].Rotate(angle);
 		worldVertices[i] += position;

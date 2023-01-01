@@ -62,13 +62,13 @@ bool CollisionDetection::IsCollidingPolygonPolygon(Body* body1, Body* body2, Con
 			contact.depth = -separationBetweenPoly1And2;
 			contact.normal = poly1BestAxisOfPenetration.Normal();
 			contact.start = vertexInPoly2WithMinProjection;
-			contact.end = contact.start + contact.normal * contact.depth;
+			contact.end = vertexInPoly2WithMinProjection + contact.normal * contact.depth;
 		}
 		else {
 			contact.depth = -separationBetweenPoly2And1;
-			contact.normal = poly2BestAxisOfPenetration.Normal();
-			contact.start = vertexInPoly1WithMinProjection;
-			contact.end = contact.start + contact.normal * contact.depth;
+			contact.normal = -poly2BestAxisOfPenetration.Normal();
+			contact.start = vertexInPoly1WithMinProjection - contact.normal * contact.depth;
+			contact.end = vertexInPoly1WithMinProjection;
 		}
 
 		return true;

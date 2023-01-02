@@ -1,15 +1,19 @@
 #include "CollisionDetection.h"
 
 bool CollisionDetection::IsColliding(Body* body1, Body* body2, Contact& contact) {
-	if (body1->shape->GetType() == CIRCLE && body2->shape->GetType() == CIRCLE) {
-		return IsCollidingCircleCircle(body1, body2, contact);
+	if (body1->shape->GetType() == CIRCLE) {
+		if (body2->shape->GetType() == CIRCLE) {
+			return IsCollidingCircleCircle(body1, body2, contact);
+		}
+		else {
+			return IsCollidingCirclePolygon(body1, body2, contact);
+		}
 	}
-	else if ((body1->shape->GetType() == POLYGON || body1->shape->GetType() == BOX) 
-		&& (body2->shape->GetType() == POLYGON || body2->shape->GetType() == BOX)) {
+	else if (body2->shape->GetType() == CIRCLE) {
+		return IsCollidingCirclePolygon(body2, body1, contact);
+	}
+	else {
 		return IsCollidingPolygonPolygon(body1, body2, contact);
-	}
-	else{//temporary - remove later
-		return false;
 	}
 }
 
@@ -36,6 +40,10 @@ bool CollisionDetection::IsCollidingCircleCircle(Body* body1, Body* body2, Conta
 		contact.depth = (contact.end - contact.start).Magnitude();
 		return true;
 	}
+}
+
+bool CollisionDetection::IsCollidingCirclePolygon(Body* circleBody, Body* polyBody, Contact& contact) {
+
 }
 
 bool CollisionDetection::IsCollidingPolygonPolygon(Body* body1, Body* body2, Contact& contact) {

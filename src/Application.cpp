@@ -18,6 +18,14 @@ void Application::Setup() {
     floor->elasticity = 0.2f;
     bodies.push_back(floor);
 
+    Body* leftWall = new Body(BoxShape(50, 300), 0, Graphics::Height() - 200, 0.0f);
+    leftWall->elasticity = 0.2f;
+    bodies.push_back(leftWall);
+
+    Body* rightWall = new Body(BoxShape(50, 300), Graphics::Width(), Graphics::Height() - 200, 0.0f);
+    rightWall->elasticity = 0.2f;
+    bodies.push_back(rightWall);
+
     Body* bigBox = new Body(BoxShape(200, 200), Graphics::Width() / 2.0f, Graphics::Height() / 2.0f, 0.0f);
     bigBox->rotation = 1.4f;
     bigBox->elasticity = 0.1f;

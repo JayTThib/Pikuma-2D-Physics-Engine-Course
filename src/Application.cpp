@@ -14,21 +14,27 @@ bool Application::IsRunning() {
 void Application::Setup() {
     running = Graphics::OpenWindow();
 
+    const float wallFric = 0.4f;
+
     Body* floor = new Body(BoxShape(Graphics::Width() - 50, 50), Graphics::Width() / 2.0f, Graphics::Height() - 50, 0.0f);
-    floor->elasticity = 0.2f;
+    floor->elasticity = 0.5f;
+    floor->friction = wallFric;
     bodies.push_back(floor);
 
     Body* leftWall = new Body(BoxShape(50, 300), 0, Graphics::Height() - 200, 0.0f);
-    leftWall->elasticity = 0.2f;
+    leftWall->elasticity = 0.5f;
+    leftWall->friction = wallFric;
     bodies.push_back(leftWall);
 
     Body* rightWall = new Body(BoxShape(50, 300), Graphics::Width(), Graphics::Height() - 200, 0.0f);
-    rightWall->elasticity = 0.2f;
+    rightWall->elasticity = 0.5f;
+    rightWall->friction = wallFric;
     bodies.push_back(rightWall);
 
     Body* bigBox = new Body(BoxShape(200, 200), Graphics::Width() / 2.0f, Graphics::Height() / 2.0f, 0.0f);
     bigBox->rotation = 1.4f;
-    bigBox->elasticity = 0.1f;
+    bigBox->elasticity = 0.7f;
+    bigBox->friction = wallFric;
     bodies.push_back(bigBox);
 }
 
@@ -90,9 +96,10 @@ void Application::Input() {
             case SDL_MOUSEBUTTONDOWN:
                 int x, y;
                 SDL_GetMouseState(&x, &y);
-                Body* box = new Body(BoxShape(50, 50), x, y, 1.0f);
-                box->elasticity = 0.2f;
-                bodies.push_back(box);
+                Body* circ = new Body(CircleShape(30), x, y, 1.0f);
+                circ->elasticity = 0.5f;
+                circ->friction = 0.4f;
+                bodies.push_back(circ);
                 break;
         }
     }

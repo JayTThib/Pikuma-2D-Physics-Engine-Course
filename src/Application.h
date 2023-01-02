@@ -7,9 +7,9 @@
 
 class Application {
     private:
+        bool debug = false;
         bool running = false;
-        std::vector<Body*> bodies;
-        Vec2 pushForce = Vec2(0.0f, 0.0f);
+        World* world;
 
     public:
         Application() = default;
@@ -20,6 +20,8 @@ class Application {
         void Update();
         void Render();
         void Destroy();
+
+        void GenerateTerrain();
 };
 
 #endif

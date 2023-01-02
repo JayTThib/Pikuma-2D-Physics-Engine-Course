@@ -24,7 +24,8 @@ float CircleShape::GetMomentOfInertia() const {
 }
 
 PolygonShape::PolygonShape(const std::vector<Vec2> vertices) {
-	
+	localVertices = vertices;
+	worldVertices = vertices;
 }
 
 PolygonShape::~PolygonShape() {
@@ -41,7 +42,7 @@ Shape* PolygonShape::Clone() const {
 
 float PolygonShape::GetMomentOfInertia() const {
 	//TODO
-	return 0.0f;
+	return 5000.0f;
 }
 
 Vec2 PolygonShape::EdgeAt(int index) const {
@@ -92,15 +93,14 @@ BoxShape::BoxShape(float width, float height) {
 	this->width = width;
 	this->height = height;
 
-	localVertices.push_back(Vec2(-width / 2.0f, -height / 2.0f));//Top left
-	localVertices.push_back(Vec2(+width / 2.0f, -height / 2.0f));//Top right
-	localVertices.push_back(Vec2(+width / 2.0f, +height / 2.0f));//Bottom right
-	localVertices.push_back(Vec2(-width / 2.0f, +height / 2.0f));//Bottom left
-
-	worldVertices.push_back(Vec2(-width / 2.0f, -height / 2.0f));//Top left
-	worldVertices.push_back(Vec2(+width / 2.0f, -height / 2.0f));//Top right
-	worldVertices.push_back(Vec2(+width / 2.0f, +height / 2.0f));//Bottom right
-	worldVertices.push_back(Vec2(-width / 2.0f, +height / 2.0f));//Bottom left
+	localVertices = 
+	{
+		Vec2(-width / 2.0f, -height / 2.0f),//Top left
+		Vec2(+width / 2.0f, -height / 2.0f),//Top right
+		Vec2(+width / 2.0f, +height / 2.0f),//Bottom right
+		Vec2(-width / 2.0f, +height / 2.0f)//Bottom left
+	};
+	worldVertices = localVertices;
 }
 
 BoxShape::~BoxShape() {

@@ -28,6 +28,7 @@ struct Body {
 	float inverseRotationalInertia;
 
 	float elasticity;//Coefficient of restitution (from 0 to 1. Perfect collision elasticity is 1, perfect inelastic collision is 0).
+	float friction;//Coefficient of friction
 
 	Shape* shape = nullptr;
 

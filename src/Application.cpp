@@ -20,7 +20,7 @@ void Application::Setup() {
 
     Body* bigBox = new Body(BoxShape(200, 200), Graphics::Width() / 2.0f, Graphics::Height() / 2.0f, 0.0f);
     bigBox->rotation = 1.4f;
-    bigBox->elasticity = 0.5f;
+    bigBox->elasticity = 0.1f;
     bodies.push_back(bigBox);
 }
 
@@ -83,6 +83,7 @@ void Application::Input() {
                 int x, y;
                 SDL_GetMouseState(&x, &y);
                 Body* box = new Body(BoxShape(50, 50), x, y, 1.0f);
+                box->elasticity = 0.2f;
                 bodies.push_back(box);
                 break;
         }
@@ -146,30 +147,6 @@ void Application::Update() {
 
                 bodyA->isColliding = true;
                 bodyB->isColliding = true;
-            }
-        }
-    }
-
-    //Wall collisions here
-    for (Body* body : bodies) {
-        if (body->shape->GetType() == CIRCLE) {
-            CircleShape* circleShape = (CircleShape*)body->shape;
-            if (body->position.x - circleShape->radius <= 0) {
-                body->position.x = circleShape->radius;
-                body->velocity.x *= -0.9f;
-            }
-            else if (body->position.x + circleShape->radius >= Graphics::Width()) {
-                body->position.x = Graphics::Width() - circleShape->radius;
-                body->velocity.x *= -0.9f;
-            }
-
-            if (body->position.y - circleShape->radius <= 0) {
-                body->position.y = circleShape->radius;
-                body->velocity.y *= -0.9f;
-            }
-            else if (body->position.y + circleShape->radius >= Graphics::Height()) {
-                body->position.y = Graphics::Height() - circleShape->radius;
-                body->velocity.y *= -0.9f;
             }
         }
     }

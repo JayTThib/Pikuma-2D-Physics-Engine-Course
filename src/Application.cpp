@@ -98,7 +98,7 @@ void Application::Update() {
     if (timeToWait > 0) {
         SDL_Delay(timeToWait);
     }
-
+    
     //Calc deltaTime in seconds
     float deltaTime = (SDL_GetTicks() - timePreviousFrame) / 1000.0f;
     if (deltaTime > 0.016f) {

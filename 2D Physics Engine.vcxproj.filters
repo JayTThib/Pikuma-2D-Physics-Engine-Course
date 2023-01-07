@@ -54,6 +54,9 @@
     <ClCompile Include="src\Physics\World.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Physics\Constraint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\SDL2_gfx\SDL2_gfxPrimitives.h">
@@ -96,6 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Physics\World.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Physics\Constraint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

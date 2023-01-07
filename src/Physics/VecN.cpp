@@ -36,6 +36,7 @@ VecN& VecN::operator = (const VecN& vecN) {
 	delete[] data;
 	componentNum = vecN.componentNum;
 	data = new float[componentNum];
+
 	for (int i = 0; i < componentNum; i++) {
 		data[i] = vecN.data[i];
 	}

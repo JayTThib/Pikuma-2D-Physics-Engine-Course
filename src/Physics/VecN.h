@@ -10,18 +10,18 @@ struct VecN {
 	VecN(const VecN& vecN);
 	~VecN();
 
-	void Zero();									//Resets data
-	float Dot(const VecN& vecN) const;				//vecN1.Dot(vecN2)
+	void Zero();//Resets data
+	float Dot(const VecN& vecN) const;//vecN1.Dot(vecN2)
 
-	VecN& operator = (const VecN& vecN);			//vecN1 = vecN2
-	VecN operator + (const VecN& vecN) const;		//vecN1 + vecN2
-	VecN operator - (const VecN& vecN) const;		//vecN1 - vecN2
-	VecN operator * (const float scale) const;		//vecN1 * scale
-	const VecN& operator += (const VecN& vecN);		//vecN1 += vecN2
-	const VecN& operator -= (const VecN& vecN);		//vecN1 -= vecN2
-	const VecN& operator *= (const float scale);	//vecN1 *= scale
-	float operator [] (const int index) const;		//vecN1[index]
-	float& operator [] (const int index);			//vecN1[index]
+	VecN& operator = (const VecN& vecN);				//vecN1 = vecN2
+	VecN operator + (const VecN& vecN) const;			//vecN1 + vecN2
+	VecN operator - (const VecN& vecN) const;			//vecN1 - vecN2
+	VecN operator * (const float multiplier) const;		//vecN1 * multiplier
+	const VecN& operator += (const VecN& vecN);			//vecN1 += vecN2
+	const VecN& operator -= (const VecN& vecN);			//vecN1 -= vecN2
+	const VecN& operator *= (const float multiplier);	//vecN1 *= multiplier
+	float operator [] (const int index) const;			//vecN1[index]
+	float& operator [] (const int index);				//vecN1[index]
 };
 
 #endif

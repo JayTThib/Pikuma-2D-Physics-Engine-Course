@@ -30,14 +30,14 @@ void Contact::ResolveCollision() {
 	//Calc collision impulse along the normal
 	float relativeVelocityDotNormal = relativeVelocity.Dot(normal);
 	const Vec2 impulseDirectionNormal = normal;
-	const float impulseMagnitudeNormal = -(1 + elasticity) * relativeVelocityDotNormal / ((body1->inverseMass + body2->inverseMass) + body1Dist.Cross(normal) * body1Dist.Cross(normal) * body1->inverseRotationalInertia + body2Dist.Cross(normal) * body2Dist.Cross(normal) * body2->inverseRotationalInertia);
+	const float impulseMagnitudeNormal = -(1 + elasticity) * relativeVelocityDotNormal / ((body1->inverseMass + body2->inverseMass) + body1Dist.Cross(normal) * body1Dist.Cross(normal) * body1->inverseMomentOfInertia + body2Dist.Cross(normal) * body2Dist.Cross(normal) * body2->inverseMomentOfInertia);
 	Vec2 impulseNormal = impulseDirectionNormal * impulseMagnitudeNormal;
 	
 	//Calc collision impulse along the tangent
 	Vec2 tangent = normal.Normal();
 	float relativeVelocityDotTangent = relativeVelocity.Dot(tangent);
 	const Vec2 impulseDirectionTangent = tangent;
-	const float impulseMagnitudeTangent = fric * -(1 + elasticity) * relativeVelocityDotTangent / ((body1->inverseMass + body2->inverseMass) + body1Dist.Cross(tangent) * body1Dist.Cross(tangent) * body1->inverseRotationalInertia + body2Dist.Cross(tangent) * body2Dist.Cross(tangent) * body2->inverseRotationalInertia);
+	const float impulseMagnitudeTangent = fric * -(1 + elasticity) * relativeVelocityDotTangent / ((body1->inverseMass + body2->inverseMass) + body1Dist.Cross(tangent) * body1Dist.Cross(tangent) * body1->inverseMomentOfInertia + body2Dist.Cross(tangent) * body2Dist.Cross(tangent) * body2->inverseMomentOfInertia);
 	Vec2 impulseTangent = impulseDirectionTangent * impulseMagnitudeTangent;
 
 	Vec2 finalImpulse = impulseNormal + impulseTangent;

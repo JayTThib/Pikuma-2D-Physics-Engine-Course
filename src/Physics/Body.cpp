@@ -23,12 +23,12 @@ Body::Body(const Shape& shape, float x, float y, float mass) {
 		this->inverseMass = 0.0f;
 	}
 
-	rotationalInertia = shape.GetMomentOfInertia() * mass;
-	if (rotationalInertia != 0.0f) {
-		this->inverseRotationalInertia = 1.0f / rotationalInertia;
+	momentOfInertia = shape.GetMomentOfInertia() * mass;
+	if (momentOfInertia != 0.0f) {
+		this->inverseMomentOfInertia = 1.0f / momentOfInertia;
 	}
 	else {
-		this->inverseRotationalInertia = 0.0f;
+		this->inverseMomentOfInertia = 0.0f;
 	}
 }
 
@@ -57,7 +57,7 @@ void Body::IntegrateAngular(float deltaTime) {
 		return;
 	}
 
-	angularAcceleration = sumTorque * inverseRotationalInertia;
+	angularAcceleration = sumTorque * inverseMomentOfInertia;
 	angularVelocity += angularAcceleration * deltaTime;
 	rotation += angularVelocity * deltaTime;
 	ClearTorque();
@@ -77,7 +77,7 @@ void Body::ApplyImpulse(const Vec2& impulse, const Vec2& pointOfImpactDist) {
 	}
 
 	velocity += impulse * inverseMass;
-	angularVelocity += pointOfImpactDist.Cross(impulse) * inverseRotationalInertia;
+	angularVelocity += pointOfImpactDist.Cross(impulse) * inverseMomentOfInertia;
 }
 
 void Body::AddForce(const Vec2& force) {

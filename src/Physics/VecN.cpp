@@ -43,9 +43,9 @@ VecN& VecN::operator = (const VecN& vecN) {
 	return *this;
 }
 
-VecN VecN::operator * (float scale) const {
+VecN VecN::operator * (float multiplier) const {
 	VecN result = *this;
-	result *= scale;
+	result *= multiplier;
 	return result;
 }
 
@@ -65,9 +65,9 @@ VecN VecN::operator - (const VecN& vecN) const {
 	return result;
 }
 
-const VecN& VecN::operator *= (float scale) {
+const VecN& VecN::operator *= (float multiplier) {
 	for (int i = 0; i < componentNum; i++) {
-		data[i] *= scale;
+		data[i] *= multiplier;
 	}
 	return *this;
 }

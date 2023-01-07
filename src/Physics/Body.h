@@ -12,20 +12,17 @@ struct Body {
 	Vec2 velocity;
 	Vec2 acceleration;
 
-	//Angular motion
 	float rotation;//Radians
 	float angularVelocity;
 	float angularAcceleration;
 
-	//Forces and torque
 	Vec2 sumForces;
 	float sumTorque;
 
-	//Mass and Moment of Inertia
 	float mass;
 	float inverseMass;
-	float rotationalInertia;
-	float inverseRotationalInertia;
+	float momentOfInertia;
+	float inverseMomentOfInertia;
 
 	float elasticity;//Coefficient of restitution (from 0 to 1. Perfect collision elasticity is 1, perfect inelastic collision is 0).
 	float friction;//Coefficient of friction

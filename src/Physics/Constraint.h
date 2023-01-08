@@ -9,6 +9,9 @@ class Constraint {
 		Body* bodyA;
 		Body* bodyB;
 		
+		Vec2 pointA;//The anchor point in bodyA's local space
+		Vec2 pointB;//The anchor point in bodyB's local space
+
 		virtual ~Constraint() = default;
 
 		Matrix GetInverseMatrix() const;
@@ -17,12 +20,18 @@ class Constraint {
 		virtual void Solve() {};
 };
 
-class DistanceConstraint : public Constraint {
-	//Matrix jacobian;
+class JointConstraint : public Constraint {
+	private:
+		Matrix jacobian;
+
+	public:
+		JointConstraint();
+		JointConstraint(Body* bodyA, Body* bodyB, const Vec2& anchorPoint);
+		void Solve() override;
 };
 
 class PenetrationConstraint : public Constraint {
-	//Matrix jacobian;
+	Matrix jacobian;
 };
 
 #endif

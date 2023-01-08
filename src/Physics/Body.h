@@ -39,6 +39,9 @@ struct Body {
 	void ClearForces();
 	void ClearTorque();
 
+	Vec2 LocalSpaceToWorldSpace(const Vec2& point) const;
+	Vec2 WorldSpaceToLocalSpace(const Vec2& point) const;
+
 	void ApplyImpulse(const Vec2& impulse);
 	void ApplyImpulse(const Vec2& impulse, const Vec2& pointOfImpactDist);
 

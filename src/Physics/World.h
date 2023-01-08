@@ -2,6 +2,7 @@
 #define WORLD_H
 
 #include "./Body.h"
+#include "./Constraint.h"
 #include <vector>
 
 class World {
@@ -10,6 +11,7 @@ class World {
 		std::vector<Body*> bodies;
 		std::vector<Vec2> forces;
 		std::vector<float> torques;
+		std::vector<Constraint*> constraints;
 
 	public:
 		World(float gravity);

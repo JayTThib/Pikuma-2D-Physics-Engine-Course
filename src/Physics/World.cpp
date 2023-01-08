@@ -51,8 +51,16 @@ void World::Update(float deltaTime) {
 		}
 	}
 
-	for (auto body : bodies) {
-		body->Update(deltaTime);
+	for (Body* body : bodies) {
+		body->IntegrateForces(deltaTime);
+	}
+
+	for (Constraint*& constraint : constraints) {
+		constraint->Solve();
+	}
+
+	for (Body* body : bodies) {
+		body->IntegrateVelocities(deltaTime);
 	}
 
 	CheckCollisions();

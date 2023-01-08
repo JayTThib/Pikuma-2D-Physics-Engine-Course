@@ -17,6 +17,10 @@ Shape* CircleShape::Clone() const {
 	return new CircleShape(radius);
 }
 
+void CircleShape::UpdateVertices(float angle, const Vec2& position) {
+	return; //Do nothing since circles don't have vertices
+}
+
 float CircleShape::GetMomentOfInertia() const {
 	//For solid circles, the moment of inertia is 1/2 * r^2
 	//But this still needs to be multiplied by the rigidbody's mass
@@ -28,9 +32,7 @@ PolygonShape::PolygonShape(const std::vector<Vec2> vertices) {
 	worldVertices = vertices;
 }
 
-PolygonShape::~PolygonShape() {
-
-}
+PolygonShape::~PolygonShape() {}
 
 ShapeType PolygonShape::GetType() const {
 	return POLYGON;
@@ -104,7 +106,7 @@ BoxShape::BoxShape(float width, float height) {
 }
 
 BoxShape::~BoxShape() {
-
+	//todo
 }
 
 ShapeType BoxShape::GetType() const {

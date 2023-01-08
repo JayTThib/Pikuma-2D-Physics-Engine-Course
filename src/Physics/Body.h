@@ -45,10 +45,8 @@ struct Body {
 	void ApplyImpulse(const Vec2& impulse);
 	void ApplyImpulse(const Vec2& impulse, const Vec2& pointOfImpactDist);
 
-	void IntegrateLinear(float deltaTime);
-	void IntegrateAngular(float deltaTime);
-
-	void Update(float deltaTime);
+	void IntegrateForces(const float deltaTime);
+	void IntegrateVelocities(const float deltaTime);
 };
 
 #endif

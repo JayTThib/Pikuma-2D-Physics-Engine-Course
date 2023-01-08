@@ -3,6 +3,7 @@
 #include "./Physics/Force.h"
 #include "./Physics/CollisionDetection.h"
 #include "./Physics/Contact.h"
+#include "./Physics/Constraint.h"
 #include <iostream>
 
 bool Application::IsRunning() {
@@ -19,7 +20,6 @@ void Application::Setup() {
     srand(randSeed);
 
     InitWorld();
-    GenerateTerrain();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -154,6 +154,9 @@ void Application::InitWorld() {
 
     Body* bodyA = new Body(CircleShape(30), Graphics::Width() / 2.0f, Graphics::Height() / 2.0f, 0.0f);
     Body* bodyB = new Body(CircleShape(20), bodyA->position.x - 100, bodyA->position.y, 1.0f);
+    world->AddBody(bodyA);
+    world->AddBody(bodyB);
 
     JointConstraint* joint = new JointConstraint(bodyA, bodyB, bodyA->position);
+    world->AddConstraint(joint);
 }

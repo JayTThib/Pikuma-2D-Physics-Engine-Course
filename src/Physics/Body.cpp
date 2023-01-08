@@ -41,28 +41,6 @@ bool Body::IsStatic() const {
 	return fabs(inverseMass) < epsilon;//could be improved - https://floating-point-gui.de/errors/comparison/
 }
 
-void Body::IntegrateLinear(float deltaTime) {
-	if (IsStatic()) {
-		return;
-	}
-
-	acceleration = sumForces * inverseMass;
-	velocity += acceleration * deltaTime;
-	position += velocity * deltaTime;
-	ClearForces();
-}
-
-void Body::IntegrateAngular(float deltaTime) {
-	if (IsStatic()) {
-		return;
-	}
-
-	angularAcceleration = sumTorque * inverseMomentOfInertia;
-	angularVelocity += angularAcceleration * deltaTime;
-	rotation += angularVelocity * deltaTime;
-	ClearTorque();
-}
-
 void Body::ApplyImpulse(const Vec2& impulse) {
 	if (IsStatic()) {
 		return;
@@ -109,12 +87,26 @@ Vec2 Body::WorldSpaceToLocalSpace(const Vec2& point) const {
 	return Vec2(rotatedX, rotatedY);
 }
 
-void Body::Update(float deltaTime) {
-	IntegrateLinear(deltaTime);
-	IntegrateAngular(deltaTime);
-
-	if (shape->GetType() == POLYGON || shape->GetType() == BOX) {
-		PolygonShape* polygonShape = (PolygonShape*)shape;
-		polygonShape->UpdateVertices(rotation, position);
+void Body::IntegrateForces(const float deltaTime) {
+	if (IsStatic()) {
+		return;
 	}
+
+	acceleration = sumForces * inverseMass;
+	velocity += acceleration * deltaTime;
+	angularAcceleration = sumTorque * inverseMomentOfInertia;
+	angularVelocity += angularAcceleration * deltaTime;
+
+	ClearForces();
+	ClearTorque();
+}
+
+void Body::IntegrateVelocities(const float deltaTime) {
+	if (IsStatic()) {
+		return;
+	}
+
+	position += velocity * deltaTime;
+	rotation += angularVelocity * deltaTime;
+	shape->UpdateVertices(rotation, position);
 }

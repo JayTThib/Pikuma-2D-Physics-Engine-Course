@@ -64,7 +64,7 @@ void World::Update(float deltaTime) {
 	}
 	
 	for (Constraint*& constraint : constraints) {
-		constraint->PostSolve();
+		//constraint->PostSolve();
 	}
 
 	for (Body* body : bodies) {

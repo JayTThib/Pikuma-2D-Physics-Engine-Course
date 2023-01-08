@@ -19,19 +19,20 @@ class Constraint {
 
 		virtual void PreSolve() {}
 		virtual void Solve() {}
-		virtual void PostSolve{}
+		//virtual void PostSolve() {}
 };
 
 class JointConstraint : public Constraint {
 	private:
 		Matrix jacobian;
+		VecN cachedLambda;
 
 	public:
 		JointConstraint();
 		JointConstraint(Body* bodyA, Body* bodyB, const Vec2& anchorPoint);
 		void PreSolve() override;
 		void Solve() override;
-		void PostSolve() override;
+		//void PostSolve() override;
 };
 
 class PenetrationConstraint : public Constraint {

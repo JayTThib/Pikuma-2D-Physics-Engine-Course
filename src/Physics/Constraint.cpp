@@ -30,20 +30,19 @@ VecN Constraint::GetVelocities() const {
 	return vecN;
 }
 
-JointConstraint::JointConstraint() : Constraint(), jacobian(1, 6) {}
+JointConstraint::JointConstraint() : Constraint(), jacobian(1, 6), cachedLambda(1) {
+	cachedLambda.Zero();
+}
 
-JointConstraint::JointConstraint(Body* bodyA, Body* bodyB, const Vec2& anchorPoint) : Constraint(), jacobian(1, 6) {
+JointConstraint::JointConstraint(Body* bodyA, Body* bodyB, const Vec2& anchorPoint) : Constraint(), jacobian(1, 6), cachedLambda(1) {
 	this->bodyA = bodyA;
 	this->bodyB = bodyB;
 	this->pointA = bodyA->WorldSpaceToLocalSpace(anchorPoint);
 	this->pointB = bodyB->WorldSpaceToLocalSpace(anchorPoint);
+	cachedLambda.Zero();
 }
 
 void JointConstraint::PreSolve() {
-
-}
-
-void JointConstraint::Solve() {
 	const Vec2 anchorPointWorldPosA = bodyA->LocalSpaceToWorldSpace(pointA);
 	const Vec2 anchorPointWorldPosB = bodyB->LocalSpaceToWorldSpace(pointB);
 
@@ -65,7 +64,18 @@ void JointConstraint::Solve() {
 
 	float jacobianElement4 = distBetweenCenterOfMassAndPointB.Cross(anchorPointWorldPosB - anchorPointWorldPosA) * 2.0f;
 	jacobian.rows[0][5] = jacobianElement4;//Angular velocity of B
+	
+	//Warm starting (apply cachedLambda)
+	const Matrix jacobianTransposed = jacobian.Transpose();
+	VecN impulses = jacobianTransposed * cachedLambda;
 
+	bodyA->ApplyImpulseLinear(Vec2(impulses[0], impulses[1]));
+	bodyA->ApplyImpulseAngular(impulses[2]);
+	bodyB->ApplyImpulseLinear(Vec2(impulses[3], impulses[4]));
+	bodyB->ApplyImpulseAngular(impulses[5]);
+}
+
+void JointConstraint::Solve() {
 	const VecN velocityVecN = GetVelocities();
 	const Matrix inverseMassMatrix = GetInverseMassMatrix();
 
@@ -75,6 +85,7 @@ void JointConstraint::Solve() {
 	Matrix denominator = jacobian * inverseMassMatrix * jacobianTransposed;
 	
 	VecN lambda = Matrix::SolveGaussSeidel(denominator, numerator);
+	cachedLambda += lambda;
 
 	VecN impulses = jacobianTransposed * lambda;
 
@@ -82,8 +93,4 @@ void JointConstraint::Solve() {
 	bodyA->ApplyImpulseAngular(impulses[2]);
 	bodyB->ApplyImpulseLinear(Vec2(impulses[3], impulses[4]));
 	bodyB->ApplyImpulseAngular(impulses[5]);
-}
-
-void JointConstraint::PostSolve() {
-
 }

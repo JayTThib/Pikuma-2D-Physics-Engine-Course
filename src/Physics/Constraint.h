@@ -17,7 +17,9 @@ class Constraint {
 		Matrix GetInverseMassMatrix() const;
 		VecN GetVelocities() const;
 
-		virtual void Solve() {};
+		virtual void PreSolve() {}
+		virtual void Solve() {}
+		virtual void PostSolve{}
 };
 
 class JointConstraint : public Constraint {
@@ -27,11 +29,14 @@ class JointConstraint : public Constraint {
 	public:
 		JointConstraint();
 		JointConstraint(Body* bodyA, Body* bodyB, const Vec2& anchorPoint);
+		void PreSolve() override;
 		void Solve() override;
+		void PostSolve() override;
 };
 
 class PenetrationConstraint : public Constraint {
 	Matrix jacobian;
+	//Solve() override
 };
 
 #endif

@@ -115,6 +115,13 @@ void Application::Update() {
 // Render function (called several times per second to draw objects)
 ///////////////////////////////////////////////////////////////////////////////
 void Application::Render() {
+
+    for (Constraint* joint : world->GetConstraints()) {
+        const Vec2 pa = joint->bodyA->LocalSpaceToWorldSpace(joint->pointA);
+        const Vec2 pb = joint->bodyB->LocalSpaceToWorldSpace(joint->pointA);
+        Graphics::DrawLine(pa.x, pa.y, pb.x, pb.y, 0xFF555555);
+    }
+
     for (Body* body : world->GetBodies()) {
         Uint32 color = body->isColliding ? 0xFF0000FF : 0xFFFFFFFF;
         switch (body->shape->GetType()) {
@@ -151,7 +158,7 @@ void Application::Destroy() {
 
 void Application::InitWorld() {
     world = new World(-9.8f);
-
+    /*
     Body* bodyA = new Body(CircleShape(30), Graphics::Width() / 2.0f, Graphics::Height() / 2.0f, 0.0f);
     Body* bodyB = new Body(CircleShape(20), bodyA->position.x - 100, bodyA->position.y, 1.0f);
     world->AddBody(bodyA);
@@ -159,4 +166,19 @@ void Application::InitWorld() {
 
     JointConstraint* joint = new JointConstraint(bodyA, bodyB, bodyA->position);
     world->AddConstraint(joint);
+    */
+    const int NUM_BODIES = 8;
+    for (int i = 0; i < NUM_BODIES; i++) {
+        float mass = (i == 0) ? 0.0f : 1.0f;
+        Body* body = new Body(BoxShape(30, 30), Graphics::Width() / 2.0 - (i * 40), 100, mass);
+        world->AddBody(body);
+    }
+
+    // Add joints to connect them (distance constraints)
+    for (int i = 0; i < NUM_BODIES - 1; i++) {
+        Body* a = world->GetBodies()[i];
+        Body* b = world->GetBodies()[i + 1];
+        JointConstraint* joint = new JointConstraint(a, b, a->position);
+        world->AddConstraint(joint);
+    }
 }

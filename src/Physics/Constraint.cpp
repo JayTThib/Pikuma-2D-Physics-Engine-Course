@@ -39,6 +39,10 @@ JointConstraint::JointConstraint(Body* bodyA, Body* bodyB, const Vec2& anchorPoi
 	this->pointB = bodyB->WorldSpaceToLocalSpace(anchorPoint);
 }
 
+void JointConstraint::PreSolve() {
+
+}
+
 void JointConstraint::Solve() {
 	const Vec2 anchorPointWorldPosA = bodyA->LocalSpaceToWorldSpace(pointA);
 	const Vec2 anchorPointWorldPosB = bodyB->LocalSpaceToWorldSpace(pointB);
@@ -78,4 +82,8 @@ void JointConstraint::Solve() {
 	bodyA->ApplyImpulseAngular(impulses[2]);
 	bodyB->ApplyImpulseLinear(Vec2(impulses[3], impulses[4]));
 	bodyB->ApplyImpulseAngular(impulses[5]);
+}
+
+void JointConstraint::PostSolve() {
+
 }

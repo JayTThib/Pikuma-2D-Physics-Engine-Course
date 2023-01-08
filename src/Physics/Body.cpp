@@ -30,6 +30,8 @@ Body::Body(const Shape& shape, float x, float y, float mass) {
 	else {
 		this->inverseMomentOfInertia = 0.0f;
 	}
+
+	this->shape->UpdateVertices(rotation, position);
 }
 
 Body::~Body() {

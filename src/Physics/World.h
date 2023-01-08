@@ -20,6 +20,9 @@ class World {
 		void AddBody(Body* body);
 		std::vector<Body*>& GetBodies();
 
+		void AddConstraint(Constraint* constraint);
+		std::vector<Constraint*>& GetConstraints();
+
 		void AddForce(const Vec2& force);
 		void AddTorque(float torque);
 

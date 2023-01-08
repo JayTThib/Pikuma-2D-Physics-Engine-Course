@@ -20,6 +20,7 @@ struct Matrix {
 	VecN operator * (const VecN& vecN) const;		//mat1 * vecN
 	Matrix operator * (const Matrix& mat) const;	//mat1 * mat2
 
+	static VecN SolveGaussSeidel(const Matrix& A, const VecN& b);
 };
 
 #endif

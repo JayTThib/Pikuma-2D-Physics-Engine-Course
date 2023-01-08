@@ -71,3 +71,18 @@ VecN Matrix::operator * (const VecN& vecN) const {
 	}
 	return result;
 }
+
+VecN Matrix::SolveGaussSeidel(const Matrix& A, const VecN& b) {
+	VecN X(b.componentNum);
+	X.Zero();
+
+	for (int iterations = 0; iterations < b.componentNum; iterations++) {
+		for (int i = 0; i < b.componentNum; i++) {
+			if (A.rows[i][i] != 0.0f) {
+				X[i] += (b[i] / A.rows[i][i]) - (A.rows[i].Dot(X) / A.rows[i][i]);
+			}
+		}
+	}
+
+	return X;
+}

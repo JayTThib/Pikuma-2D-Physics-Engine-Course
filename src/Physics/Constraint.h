@@ -14,7 +14,7 @@ class Constraint {
 
 		virtual ~Constraint() = default;
 
-		Matrix GetInverseMatrix() const;
+		Matrix GetInverseMassMatrix() const;
 		VecN GetVelocities() const;
 
 		virtual void Solve() {};

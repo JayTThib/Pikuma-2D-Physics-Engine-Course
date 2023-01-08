@@ -41,7 +41,7 @@ bool Body::IsStatic() const {
 	return fabs(inverseMass) < epsilon;//could be improved - https://floating-point-gui.de/errors/comparison/
 }
 
-void Body::ApplyImpulse(const Vec2& impulse) {
+void Body::ApplyImpulseLinear(const Vec2& impulse) {
 	if (IsStatic()) {
 		return;
 	}
@@ -49,13 +49,21 @@ void Body::ApplyImpulse(const Vec2& impulse) {
 	velocity += impulse * inverseMass;
 }
 
-void Body::ApplyImpulse(const Vec2& impulse, const Vec2& pointOfImpactDist) {
+void Body::ApplyImpulseAtPoint(const Vec2& impulse, const Vec2& point) {
 	if (IsStatic()) {
 		return;
 	}
 
 	velocity += impulse * inverseMass;
-	angularVelocity += pointOfImpactDist.Cross(impulse) * inverseMomentOfInertia;
+	angularVelocity += point.Cross(impulse) * inverseMomentOfInertia;
+}
+
+void Body::ApplyImpulseAngular(const float impulse) {
+	if (IsStatic()) {
+		return;
+	}
+
+	angularVelocity += impulse * inverseMomentOfInertia;
 }
 
 void Body::AddForce(const Vec2& force) {

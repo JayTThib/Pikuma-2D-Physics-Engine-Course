@@ -24,7 +24,6 @@ class Application {
         void Destroy();
 
         void InitWorld();
-        void GenerateTerrain();
 };
 
 #endif

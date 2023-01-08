@@ -151,29 +151,9 @@ void Application::Destroy() {
 
 void Application::InitWorld() {
     world = new World(-9.8f);
-}
 
-void Application::GenerateTerrain() {
-    const float wallFric = 0.4f;
+    Body* bodyA = new Body(CircleShape(30), Graphics::Width() / 2.0f, Graphics::Height() / 2.0f, 0.0f);
+    Body* bodyB = new Body(CircleShape(20), bodyA->position.x - 100, bodyA->position.y, 1.0f);
 
-    Body* floor = new Body(BoxShape(Graphics::Width() - 50, 50), Graphics::Width() / 2.0f, Graphics::Height() - 50, 0.0f);
-    floor->elasticity = 0.5f;
-    floor->friction = wallFric;
-    world->AddBody(floor);
-
-    Body* leftWall = new Body(BoxShape(50, 300), 0, Graphics::Height() - 200, 0.0f);
-    leftWall->elasticity = 0.5f;
-    leftWall->friction = wallFric;
-    world->AddBody(leftWall);
-
-    Body* rightWall = new Body(BoxShape(50, 300), Graphics::Width(), Graphics::Height() - 200, 0.0f);
-    rightWall->elasticity = 0.5f;
-    rightWall->friction = wallFric;
-    world->AddBody(rightWall);
-
-    Body* bigBox = new Body(BoxShape(200, 200), Graphics::Width() / 2.0f, Graphics::Height() / 2.0f, 0.0f);
-    bigBox->rotation = 1.4f;
-    bigBox->elasticity = 0.7f;
-    bigBox->friction = wallFric;
-    world->AddBody(bigBox);
+    JointConstraint* joint = new JointConstraint(bodyA, bodyB, bodyA->position);
 }

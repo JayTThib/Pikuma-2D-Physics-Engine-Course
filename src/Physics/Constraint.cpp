@@ -30,11 +30,11 @@ VecN Constraint::GetVelocities() const {
 	return vecN;
 }
 
-JointConstraint::JointConstraint() : Constraint(), jacobian(1, 6), cachedLambda(1) {
+JointConstraint::JointConstraint() : Constraint(), jacobian(1, 6), cachedLambda(1), bias(0.0f) {
 	cachedLambda.Zero();
 }
 
-JointConstraint::JointConstraint(Body* bodyA, Body* bodyB, const Vec2& anchorPoint) : Constraint(), jacobian(1, 6), cachedLambda(1) {
+JointConstraint::JointConstraint(Body* bodyA, Body* bodyB, const Vec2& anchorPoint) : Constraint(), jacobian(1, 6), cachedLambda(1), bias(0.0f) {
 	this->bodyA = bodyA;
 	this->bodyB = bodyB;
 	this->pointA = bodyA->WorldSpaceToLocalSpace(anchorPoint);
@@ -42,7 +42,7 @@ JointConstraint::JointConstraint(Body* bodyA, Body* bodyB, const Vec2& anchorPoi
 	cachedLambda.Zero();
 }
 
-void JointConstraint::PreSolve() {
+void JointConstraint::PreSolve(const float deltaTime) {
 	const Vec2 anchorPointWorldPosA = bodyA->LocalSpaceToWorldSpace(pointA);
 	const Vec2 anchorPointWorldPosB = bodyB->LocalSpaceToWorldSpace(pointB);
 
@@ -73,6 +73,12 @@ void JointConstraint::PreSolve() {
 	bodyA->ApplyImpulseAngular(impulses[2]);
 	bodyB->ApplyImpulseLinear(Vec2(impulses[3], impulses[4]));
 	bodyB->ApplyImpulseAngular(impulses[5]);
+
+	//Compute the bias term (baumgarte stabilization)
+	const float beta = 0.1f;
+	float positionalError = (anchorPointWorldPosB - anchorPointWorldPosA).Dot(anchorPointWorldPosB - anchorPointWorldPosA);
+	positionalError = std::max(0.0f, positionalError - 0.01f);
+	bias = (beta / deltaTime) * positionalError;
 }
 
 void JointConstraint::Solve() {
@@ -81,10 +87,11 @@ void JointConstraint::Solve() {
 
 	const Matrix jacobianTransposed = jacobian.Transpose();
 
-	VecN numerator = jacobian * velocityVecN * -1.0f;
-	Matrix denominator = jacobian * inverseMassMatrix * jacobianTransposed;
-	
-	VecN lambda = Matrix::SolveGaussSeidel(denominator, numerator);
+	//Compute lambda using Ax=b (Gauss-Seidel method)
+	Matrix leftHandSide = jacobian * inverseMassMatrix * jacobianTransposed;//A
+	VecN rightHandSide = jacobian * velocityVecN * -1.0f;//b
+	rightHandSide[0] -= bias;
+	VecN lambda = Matrix::SolveGaussSeidel(leftHandSide, rightHandSide);
 	cachedLambda += lambda;
 
 	VecN impulses = jacobianTransposed * lambda;

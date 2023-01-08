@@ -56,7 +56,7 @@ void World::Update(float deltaTime) {
 	}
 
 	for (Constraint*& constraint : constraints) {
-		constraint->PreSolve();
+		constraint->PreSolve(deltaTime);
 	}
 
 	for (Constraint*& constraint : constraints) {

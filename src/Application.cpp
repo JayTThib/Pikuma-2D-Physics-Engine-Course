@@ -170,7 +170,7 @@ void Application::InitWorld() {
     const int NUM_BODIES = 8;
     for (int i = 0; i < NUM_BODIES; i++) {
         float mass = (i == 0) ? 0.0f : 1.0f;
-        Body* body = new Body(BoxShape(30, 30), Graphics::Width() / 2.0 - (i * 40), 100, mass);
+        Body* body = new Body(BoxShape(30, 30), Graphics::Width() / 2.0 - (i * 40), 300, mass);
         world->AddBody(body);
     }
 
@@ -181,4 +181,12 @@ void Application::InitWorld() {
         JointConstraint* joint = new JointConstraint(a, b, a->position);
         world->AddConstraint(joint);
     }
+
+    Body* floor = new Body(BoxShape(Graphics::Width(), 20), Graphics::Width() / 2.0f, Graphics::Height(), 0.0f);
+    world->AddBody(floor);
+    Body* leftWall = new Body(BoxShape(20, Graphics::Height()), 0, Graphics::Height() / 2.0f, 0.0f);
+    world->AddBody(leftWall);
+    Body* rightWall = new Body(BoxShape(20, Graphics::Height()), Graphics::Width(), Graphics::Height() / 2.0f, 0.0f);
+    world->AddBody(rightWall);
+
 }

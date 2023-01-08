@@ -78,11 +78,12 @@ VecN Matrix::SolveGaussSeidel(const Matrix& A, const VecN& b) {
 
 	for (int iterations = 0; iterations < b.componentNum; iterations++) {
 		for (int i = 0; i < b.componentNum; i++) {
-			if (A.rows[i][i] != 0.0f) {
-				X[i] += (b[i] / A.rows[i][i]) - (A.rows[i].Dot(X) / A.rows[i][i]);
+			float deltaX = (b[i] / A.rows[i][i]) - (A.rows[i].Dot(X) / A.rows[i][i]);
+			if (deltaX == deltaX) {//Avoids 'Not a Number' values
+				X[i] += deltaX;
 			}
 		}
 	}
-
+	
 	return X;
 }

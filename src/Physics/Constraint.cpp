@@ -1,5 +1,6 @@
 #include "Constraint.h"
-#include <iostream>
+#include <algorithm>
+
 Matrix Constraint::GetInverseMassMatrix() const {
 	Matrix mat(6, 6);
 
@@ -106,11 +107,12 @@ void JointConstraint::PostSolve() {
 
 }
 
-PenetrationConstraint::PenetrationConstraint(): Constraint(), jacobian(1, 6), cachedLambda(1), bias(0.0f) {
+PenetrationConstraint::PenetrationConstraint(): Constraint(), jacobian(2, 6), cachedLambda(2), bias(0.0f) {
 	cachedLambda.Zero();
+	friction = 0.0f;
 }
 
-PenetrationConstraint::PenetrationConstraint(Body* bodyA, Body* bodyB, const Vec2& collisionPointA, const Vec2& collisionPointB, const Vec2& normal): Constraint(), jacobian(1, 6), cachedLambda(1), bias(0.0f) {
+PenetrationConstraint::PenetrationConstraint(Body* bodyA, Body* bodyB, const Vec2& collisionPointA, const Vec2& collisionPointB, const Vec2& normal): Constraint(), jacobian(2, 6), cachedLambda(2), bias(0.0f) {
 	this->bodyA = bodyA;
 	this->bodyB = bodyB;
 	this->pointA = bodyA->WorldSpaceToLocalSpace(collisionPointA);
@@ -122,26 +124,38 @@ PenetrationConstraint::PenetrationConstraint(Body* bodyA, Body* bodyB, const Vec
 void PenetrationConstraint::PreSolve(const float deltaTime) {
 	const Vec2 worldPointA = bodyA->LocalSpaceToWorldSpace(pointA);
 	const Vec2 worldPointB = bodyB->LocalSpaceToWorldSpace(pointB);
-	Vec2 n = bodyA->LocalSpaceToWorldSpace(normal);
+	Vec2 worldNormal = bodyA->LocalSpaceToWorldSpace(normal);
 
 	const Vec2 distBetweenCenterOfMassAndPointA = worldPointA - bodyA->position;
 	const Vec2 distBetweenCenterOfMassAndPointB = worldPointB - bodyB->position;
 
 	jacobian.Zero();
 
-	Vec2 jacobianElement1 = -n;
+	Vec2 jacobianElement1 = -worldNormal;
 	jacobian.rows[0][0] = jacobianElement1.x;//Linear velocity.x of A
 	jacobian.rows[0][1] = jacobianElement1.y;//Linear velocity.y of A
 
-	float jacobianElement2 = -distBetweenCenterOfMassAndPointA.Cross(n);
+	float jacobianElement2 = -distBetweenCenterOfMassAndPointA.Cross(worldNormal);
 	jacobian.rows[0][2] = jacobianElement2;//Angular velocity of A
 
-	Vec2 jacobianElement3 = n;
+	Vec2 jacobianElement3 = worldNormal;
 	jacobian.rows[0][3] = jacobianElement3.x;//Linear velocity.x of B
 	jacobian.rows[0][4] = jacobianElement3.y;//Linear velocity.y of B
 
-	float jacobianElement4 = distBetweenCenterOfMassAndPointB.Cross(n);
+	float jacobianElement4 = distBetweenCenterOfMassAndPointB.Cross(worldNormal);
 	jacobian.rows[0][5] = jacobianElement4;//Angular velocity of B
+	
+	//Populate the second row of the jacobian (friction)
+	friction = std::max(bodyA->friction, bodyB->friction);
+	if (friction > 0.0) {
+		Vec2 tangentVec = worldNormal.Normal();
+		jacobian.rows[1][0] = -tangentVec.x;
+		jacobian.rows[1][1] = -tangentVec.y;
+		jacobian.rows[1][2] = -distBetweenCenterOfMassAndPointA.Cross(tangentVec);
+		jacobian.rows[1][3] = tangentVec.x;
+		jacobian.rows[1][4] = tangentVec.y;
+		jacobian.rows[1][5] = distBetweenCenterOfMassAndPointB.Cross(tangentVec);
+	}
 
 	//Warm starting (apply cachedLambda)
 	const Matrix jacoTransposed = jacobian.Transpose();
@@ -151,11 +165,10 @@ void PenetrationConstraint::PreSolve(const float deltaTime) {
 	bodyA->ApplyImpulseAngular(impulses[2]);
 	bodyB->ApplyImpulseLinear(Vec2(impulses[3], impulses[4]));
 	bodyB->ApplyImpulseAngular(impulses[5]);
-	
 
 	//Compute the bias term (baumgarte stabilization)
 	const float beta = 0.2f;
-	float positionalError = (worldPointB - worldPointA).Dot(-n);
+	float positionalError = (worldPointB - worldPointA).Dot(-worldNormal);
 	positionalError = std::min(0.0f, positionalError + 0.01f);
 	bias = (beta / deltaTime) * positionalError;
 }
@@ -175,6 +188,12 @@ void PenetrationConstraint::Solve() {
 	VecN oldLambda = cachedLambda;
 	cachedLambda += lambda;
 	cachedLambda[0] = (cachedLambda[0] < 0.0f) ? 0.0f : cachedLambda[0];
+
+	if (friction > 0.0f) {
+		const float maxFriction = cachedLambda[0] * friction;
+		cachedLambda[1] = std::clamp(cachedLambda[1], -maxFriction, maxFriction);
+	}
+
 	lambda = cachedLambda - oldLambda;
 
 	VecN impulses = jacobianTransposed * lambda;

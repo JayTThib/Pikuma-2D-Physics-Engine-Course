@@ -41,7 +41,8 @@ class PenetrationConstraint : public Constraint {
 		Matrix jacobian;
 		VecN cachedLambda;
 		float bias;
-		Vec2 normal;
+		Vec2 normal;//Normal direction of the penetration in bodyA's local space
+		float friction;//Friction coefficient between the two bodies
 	
 	public:
 		PenetrationConstraint();

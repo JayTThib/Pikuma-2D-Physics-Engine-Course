@@ -70,14 +70,16 @@ void World::Update(float deltaTime) {
 		for (int j = i + 1; j < bodies.size(); j++) {
 			Body* body1 = bodies[i];
 			Body* body2 = bodies[j];
-			Contact contact;
+			std::vector<Contact> contacts;
 
-			if (CollisionDetection::IsColliding(body1, body2, contact)) {
+			if (CollisionDetection::IsColliding(body1, body2, contacts)) {
 				body1->isColliding = true;
 				body2->isColliding = true;
-				//contact.ResolveCollision();
-				PenetrationConstraint penetration(contact.body1, contact.body2, contact.start, contact.end, contact.normal);
-				penetrations.push_back(penetration);
+
+				for (auto contact : contacts) {
+					PenetrationConstraint penetration(contact.body1, contact.body2, contact.start, contact.end, contact.normal);
+					penetrations.push_back(penetration);
+				}
 			}
 		}
 	}

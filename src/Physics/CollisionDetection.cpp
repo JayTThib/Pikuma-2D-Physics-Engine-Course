@@ -1,23 +1,23 @@
 #include "CollisionDetection.h"
 
-bool CollisionDetection::IsColliding(Body* body1, Body* body2, Contact& contact) {
+bool CollisionDetection::IsColliding(Body* body1, Body* body2, std::vector<Contact>& contacts) {
 	if (body1->shape->GetType() == CIRCLE) {
 		if (body2->shape->GetType() == CIRCLE) {
-			return IsCollidingCircleCircle(body1, body2, contact);
+			return IsCollidingCircleCircle(body1, body2, contacts);
 		}
 		else {
-			return IsCollidingCirclePolygon(body1, body2, contact);
+			return IsCollidingCirclePolygon(body1, body2, contacts);
 		}
 	}
 	else if (body2->shape->GetType() == CIRCLE) {
-		return IsCollidingCirclePolygon(body2, body1, contact);
+		return IsCollidingCirclePolygon(body2, body1, contacts);
 	}
 	else {
-		return IsCollidingPolygonPolygon(body1, body2, contact);
+		return IsCollidingPolygonPolygon(body1, body2, contacts);
 	}
 }
 
-bool CollisionDetection::IsCollidingCircleCircle(Body* body1, Body* body2, Contact& contact) {
+bool CollisionDetection::IsCollidingCircleCircle(Body* body1, Body* body2, std::vector<Contact>& contacts) {
 	CircleShape* circle1 = (CircleShape*)body1->shape;
 	CircleShape* circle2 = (CircleShape*)body2->shape;
 
@@ -29,6 +29,8 @@ bool CollisionDetection::IsCollidingCircleCircle(Body* body1, Body* body2, Conta
 		return false;
 	}
 	else {
+		Contact contact;
+
 		contact.body1 = body1;
 		contact.body2 = body2;
 
@@ -38,11 +40,14 @@ bool CollisionDetection::IsCollidingCircleCircle(Body* body1, Body* body2, Conta
 		contact.start = body2->position - contact.normal * circle2->radius;
 		contact.end = body1->position + contact.normal * circle1->radius;
 		contact.depth = (contact.end - contact.start).Magnitude();
+
+		contacts.push_back(contact);
+
 		return true;
 	}
 }
 
-bool CollisionDetection::IsCollidingCirclePolygon(Body* circBody, Body* polyBody, Contact& contact) {
+bool CollisionDetection::IsCollidingCirclePolygon(Body* circBody, Body* polyBody, std::vector<Contact>& contacts) {
 	const PolygonShape* polyShape = (PolygonShape*)polyBody->shape;
 	const CircleShape* circShape = (CircleShape*)circBody->shape;
 	const std::vector<Vec2>& polyVertices = polyShape->worldVertices;
@@ -74,6 +79,8 @@ bool CollisionDetection::IsCollidingCirclePolygon(Body* circBody, Body* polyBody
 			minNextVertex = polyVertices[nextVertex];
 		}
 	}
+
+	Contact contact;
 
 	/* Calc collision info based on the region that the circle touched on the polygon.
 	* Let's say that we have a flat horizontal edge. 
@@ -139,10 +146,12 @@ bool CollisionDetection::IsCollidingCirclePolygon(Body* circBody, Body* polyBody
 		contact.end = contact.start + (contact.normal * contact.depth);
 	}
 
+	contacts.push_back(contact);
+
 	return true;
 }
 
-bool CollisionDetection::IsCollidingPolygonPolygon(Body* body1, Body* body2, Contact& contact) {
+bool CollisionDetection::IsCollidingPolygonPolygon(Body* body1, Body* body2, std::vector<Contact>& contacts) {
 	//Uses the Separating Axis Theorem (doesn't work with concave polygons)
 	const PolygonShape* poly1 = (PolygonShape*)body1->shape;
 	const PolygonShape* poly2 = (PolygonShape*)body2->shape;
@@ -158,6 +167,7 @@ bool CollisionDetection::IsCollidingPolygonPolygon(Body* body1, Body* body2, Con
 		return false;
 	}
 	else{
+		Contact contact;
 		contact.body1 = body1;
 		contact.body2 = body2;
 
@@ -175,6 +185,7 @@ bool CollisionDetection::IsCollidingPolygonPolygon(Body* body1, Body* body2, Con
 			contact.end = vertexInPoly1WithMinProjection;
 		}
 
+		contacts.push_back(contact);
 		return true;
 	}
 }

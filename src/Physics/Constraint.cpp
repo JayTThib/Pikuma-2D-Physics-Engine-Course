@@ -170,7 +170,14 @@ void PenetrationConstraint::PreSolve(const float deltaTime) {
 	const float beta = 0.2f;
 	float positionalError = (worldPointB - worldPointA).Dot(-worldNormal);
 	positionalError = std::min(0.0f, positionalError + 0.01f);
-	bias = (beta / deltaTime) * positionalError;
+
+	Vec2 relativeVelocityA = bodyA->velocity + Vec2(-bodyA->angularVelocity * distBetweenCenterOfMassAndPointA.y, bodyA->angularVelocity * distBetweenCenterOfMassAndPointA.x);
+	Vec2 relativeVelocityB = bodyB->velocity + Vec2(-bodyB->angularVelocity * distBetweenCenterOfMassAndPointB.y, bodyB->angularVelocity * distBetweenCenterOfMassAndPointB.x);
+	float vrelDotNormal = (relativeVelocityA - relativeVelocityB).Dot(worldNormal);
+
+	float epsilon = std::min(bodyA->elasticity, bodyB->elasticity);
+
+	bias = (beta / deltaTime) * positionalError + (epsilon * vrelDotNormal);
 }
 
 void PenetrationConstraint::Solve() {

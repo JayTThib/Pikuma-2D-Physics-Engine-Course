@@ -2,6 +2,7 @@
 
 //Apply positional correction using the projection method
 void Contact::ResolvePenetration() {
+	/*
 	if (body1->IsStatic() && body2->IsStatic()) {
 		return;
 	}
@@ -11,9 +12,11 @@ void Contact::ResolvePenetration() {
 
 	body1->position -= normal * d1;
 	body2->position += normal * d2;
+	*/
 }
 
 void Contact::ResolveCollision() {
+	/*
 	ResolvePenetration();
 	
 	float elasticity = std::min(body1->elasticity, body2->elasticity);
@@ -43,4 +46,5 @@ void Contact::ResolveCollision() {
 
 	body1->ApplyImpulseAtPoint(finalImpulse, body1point);
 	body2->ApplyImpulseAtPoint(-finalImpulse, body2point);
+	*/
 }

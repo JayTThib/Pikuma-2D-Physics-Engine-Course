@@ -19,7 +19,7 @@ class Constraint {
 
 		virtual void PreSolve(const float deltaTime) {}
 		virtual void Solve() {}
-		//virtual void PostSolve() {}
+		virtual void PostSolve() {}
 };
 
 class JointConstraint : public Constraint {
@@ -33,12 +33,22 @@ class JointConstraint : public Constraint {
 		JointConstraint(Body* bodyA, Body* bodyB, const Vec2& anchorPoint);
 		void PreSolve(const float deltaTime) override;
 		void Solve() override;
-		//void PostSolve() override;
+		void PostSolve() override;
 };
 
 class PenetrationConstraint : public Constraint {
-	Matrix jacobian;
-	//Solve() override
+	private: 
+		Matrix jacobian;
+		VecN cachedLambda;
+		float bias;
+		Vec2 normal;
+	
+	public:
+		PenetrationConstraint();
+		PenetrationConstraint(Body* bodyA, Body* bodyB, const Vec2& collisionPointA, const Vec2& collisionPointB, const Vec2& normal);
+		void PreSolve(const float deltaTime) override;
+		void Solve() override;
+		void PostSolve() override;
 };
 
 #endif

@@ -54,21 +54,26 @@ void Application::Input() {
             case SDL_MOUSEBUTTONDOWN:
                 int x, y;
                 SDL_GetMouseState(&x, &y);
-                
+                Body* circ = new Body(CircleShape(50), x, y, 1.0f);
+                circ->elasticity = 0.7f;
+                //circ->friction = 0.7f;
+                world->AddBody(circ);
+                /*
                 int randNum = 1 + (rand() % 3);
                 if (randNum == 1) {
                     Body* circ = new Body(CircleShape(50), x, y, 1.0f);
-                    circ->elasticity = 0.5f;
-                    circ->friction = 0.7f;
+                    circ->elasticity = 0.7f;
+                    //circ->friction = 0.7f;
                     world->AddBody(circ);
                 }
                 else if (randNum == 2) {
                     Body* box = new Body(BoxShape(40, 40), x, y, 1.0f);
-                    box->elasticity = 0.5f;
-                    box->friction = 0.7f;
+                    box->elasticity = 0.2f;
+                    //box->friction = 0.7f;
                     world->AddBody(box);
                 }
                 else {
+                    
                     std::vector<Vec2> polyVertices{
                     Vec2(20, 60),
                     Vec2(-40, 20),
@@ -80,7 +85,9 @@ void Application::Input() {
                     poly->elasticity = 0.5f;
                     poly->friction = 0.7f;
                     world->AddBody(poly);
+                    
                 }
+                */
                 break;
         }
     }
@@ -167,6 +174,10 @@ void Application::InitWorld() {
     JointConstraint* joint = new JointConstraint(bodyA, bodyB, bodyA->position);
     world->AddConstraint(joint);
     */
+
+
+
+    /*
     const int NUM_BODIES = 8;
     for (int i = 0; i < NUM_BODIES; i++) {
         float mass = (i == 0) ? 0.0f : 1.0f;
@@ -188,5 +199,20 @@ void Application::InitWorld() {
     world->AddBody(leftWall);
     Body* rightWall = new Body(BoxShape(20, Graphics::Height()), Graphics::Width(), Graphics::Height() / 2.0f, 0.0f);
     world->AddBody(rightWall);
+    */
 
+    // Add a static circle in the middle of the screen
+    Body* bigBall = new Body(CircleShape(64), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
+    world->AddBody(bigBall);
+
+    //Add a floor and walls to contain objects objects
+    Body* floor = new Body(BoxShape(Graphics::Width() - 50, 50), Graphics::Width() / 2.0, Graphics::Height() - 50, 0.0);
+    Body* leftWall = new Body(BoxShape(50, Graphics::Height() - 100), 50, Graphics::Height() / 2.0 - 25, 0.0);
+    Body* rightWall = new Body(BoxShape(50, Graphics::Height() - 100), Graphics::Width() - 50, Graphics::Height() / 2.0 - 25, 0.0);
+    floor->elasticity = 0.7;
+    leftWall->elasticity = 0.2;
+    rightWall->elasticity = 0.2;
+    world->AddBody(floor);
+    world->AddBody(leftWall);
+    world->AddBody(rightWall);
 }

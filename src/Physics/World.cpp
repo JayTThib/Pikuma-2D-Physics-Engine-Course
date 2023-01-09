@@ -11,6 +11,10 @@ World::~World() {
 	for (Body* body : bodies) {
 		delete body;
 	}
+
+	for (Constraint* constraint : constraints) {
+		delete constraint;
+	}
 }
 
 void World::AddBody(Body* body) {
@@ -38,7 +42,9 @@ void World::AddTorque(float torque) {
 }
 
 void World::Update(float deltaTime) {
-	for (Body* body : bodies) {
+	std::vector<PenetrationConstraint> penetrations;
+
+	for (Body*& body : bodies) {
 		Vec2 weight = Vec2(0.0f, body->mass * gravity * PIXELS_PER_METER);
 		body->AddForce(weight);
 
@@ -55,41 +61,52 @@ void World::Update(float deltaTime) {
 		body->IntegrateForces(deltaTime);
 	}
 
-	for (Constraint*& constraint : constraints) {
-		constraint->PreSolve(deltaTime);
-	}
-
-	for (Constraint*& constraint : constraints) {
-		constraint->Solve();
-	}
-	
-	for (Constraint*& constraint : constraints) {
-		//constraint->PostSolve();
-	}
-
-	for (Body* body : bodies) {
-		body->IntegrateVelocities(deltaTime);
-	}
-
-	CheckCollisions();
-}
-
-void World::CheckCollisions() {
 	for (Body*& body : bodies) {
 		body->isColliding = false;
 	}
 
+	//Check collisions
 	for (int i = 0; i <= bodies.size() - 1; i++) {
 		for (int j = i + 1; j < bodies.size(); j++) {
 			Body* body1 = bodies[i];
 			Body* body2 = bodies[j];
-
 			Contact contact;
+
 			if (CollisionDetection::IsColliding(body1, body2, contact)) {
 				body1->isColliding = true;
 				body2->isColliding = true;
-				contact.ResolveCollision();
+				//contact.ResolveCollision();
+				PenetrationConstraint penetration(contact.body1, contact.body2, contact.start, contact.end, contact.normal);
+				penetrations.push_back(penetration);
 			}
 		}
+	}
+
+	for (auto& constraint : constraints) {
+		constraint->PreSolve(deltaTime);
+	}
+
+	for (auto& constraint : penetrations) {
+		constraint.PreSolve(deltaTime);
+	}
+
+	for (auto& constraint : constraints) {
+		constraint->Solve();
+	}
+	
+	for (auto& constraint : penetrations) {
+		constraint.Solve();
+	}
+
+	for (auto& constraint : constraints) {
+		constraint->PostSolve();
+	}
+
+	for (auto& constraint : penetrations) {
+		constraint.PostSolve();
+	}
+
+	for (auto& body : bodies) {
+		body->IntegrateVelocities(deltaTime);
 	}
 }

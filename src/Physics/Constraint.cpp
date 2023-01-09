@@ -1,5 +1,5 @@
 #include "Constraint.h"
-
+#include <iostream>
 Matrix Constraint::GetInverseMassMatrix() const {
 	Matrix mat(6, 6);
 
@@ -100,4 +100,86 @@ void JointConstraint::Solve() {
 	bodyA->ApplyImpulseAngular(impulses[2]);
 	bodyB->ApplyImpulseLinear(Vec2(impulses[3], impulses[4]));
 	bodyB->ApplyImpulseAngular(impulses[5]);
+}
+
+void JointConstraint::PostSolve() {
+
+}
+
+PenetrationConstraint::PenetrationConstraint() : Constraint(), jacobian(1, 6), cachedLambda(1), bias(0.0f) {
+	cachedLambda.Zero();
+}
+
+PenetrationConstraint::PenetrationConstraint(Body* bodyA, Body* bodyB, const Vec2& collisionPointA, const Vec2& collisionPointB, const Vec2& normal) : Constraint(), jacobian(1, 6), cachedLambda(1), bias(0.0f) {
+	this->bodyA = bodyA;
+	this->bodyB = bodyB;
+	this->pointA = bodyA->WorldSpaceToLocalSpace(collisionPointA);
+	this->pointB = bodyB->WorldSpaceToLocalSpace(collisionPointB);
+	this->normal = bodyA->WorldSpaceToLocalSpace(normal);
+	cachedLambda.Zero();
+}
+
+void PenetrationConstraint::PreSolve(const float deltaTime) {
+	const Vec2 pointA = bodyA->LocalSpaceToWorldSpace(pointA);
+	const Vec2 pointB = bodyB->LocalSpaceToWorldSpace(pointB);
+	Vec2 n = bodyA->LocalSpaceToWorldSpace(normal);
+
+	const Vec2 distBetweenCenterOfMassAndPointA = pointA - bodyA->position;
+	const Vec2 distBetweenCenterOfMassAndPointB = pointB - bodyB->position;
+
+	jacobian.Zero();
+
+	Vec2 jacobianElement1 = -n;
+	jacobian.rows[0][0] = jacobianElement1.x;//Linear velocity.x of A
+	jacobian.rows[0][1] = jacobianElement1.y;//Linear velocity.y of A
+
+	float jacobianElement2 = -distBetweenCenterOfMassAndPointA.Cross(n);
+	jacobian.rows[0][2] = jacobianElement2;//Angular velocity of A
+
+	Vec2 jacobianElement3 = n;
+	jacobian.rows[0][3] = jacobianElement3.x;//Linear velocity.x of B
+	jacobian.rows[0][4] = jacobianElement3.y;//Linear velocity.y of B
+
+	float jacobianElement4 = distBetweenCenterOfMassAndPointB.Cross(n);
+	jacobian.rows[0][5] = jacobianElement4;//Angular velocity of B
+
+	//Warm starting (apply cachedLambda)
+	VecN impulses = jacobian.Transpose() * cachedLambda;
+
+	bodyA->ApplyImpulseLinear(Vec2(impulses[0], impulses[1]));
+	bodyA->ApplyImpulseAngular(impulses[2]);
+	bodyB->ApplyImpulseLinear(Vec2(impulses[3], impulses[4]));
+	bodyB->ApplyImpulseAngular(impulses[5]);
+	
+
+	//Compute the bias term (baumgarte stabilization)
+	const float beta = 0.2f;
+	float positionalError = (pointB - pointA).Dot(-n);
+	positionalError = std::min(0.0f, positionalError + 0.01f);
+	bias = (beta / deltaTime) * positionalError;
+}
+
+void PenetrationConstraint::Solve() {
+	const VecN velocityVecN = GetVelocities();
+	const Matrix inverseMassMatrix = GetInverseMassMatrix();
+
+	const Matrix jacobianTransposed = jacobian.Transpose();
+
+	//Compute lambda using Ax=b (Gauss-Seidel method)
+	Matrix leftHandSide = jacobian * inverseMassMatrix * jacobianTransposed;//A
+	VecN rightHandSide = jacobian * velocityVecN * -1.0f;//b
+	rightHandSide[0] -= bias;
+	VecN lambda = Matrix::SolveGaussSeidel(leftHandSide, rightHandSide);
+	cachedLambda += lambda;
+
+	VecN impulses = jacobianTransposed * lambda;
+
+	bodyA->ApplyImpulseLinear(Vec2(impulses[0], impulses[1]));
+	bodyA->ApplyImpulseAngular(impulses[2]);
+	bodyB->ApplyImpulseLinear(Vec2(impulses[3], impulses[4]));
+	bodyB->ApplyImpulseAngular(impulses[5]);
+}
+
+void PenetrationConstraint::PostSolve() {
+
 }

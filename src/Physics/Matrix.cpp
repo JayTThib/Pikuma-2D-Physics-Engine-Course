@@ -1,4 +1,6 @@
 #include "Matrix.h"
+#include <cmath>
+#include <iostream>
 
 Matrix::Matrix(): rowCount(0), columnCount(0), rows(nullptr) {}
 
@@ -35,29 +37,13 @@ Matrix Matrix::Transpose() const {
 
 const Matrix& Matrix::operator = (const Matrix& mat) {
 	rowCount = mat.rowCount;
-	columnCount = mat.rowCount;
+	columnCount = mat.columnCount;
 	rows = new VecN[rowCount];
 
 	for (int i = 0; i < rowCount; i++) {
 		rows[i] = mat.rows[i];
 	}
 	return *this;
-}
-
-Matrix Matrix::operator * (const Matrix& mat) const {
-	if (mat.rowCount != rowCount && mat.columnCount != columnCount) {
-		return mat;
-	}
-
-	Matrix transposed = mat.Transpose();
-	Matrix result(rowCount, mat.columnCount);
-
-	for (int i = 0; i < rowCount; i++) {
-		for (int j = 0; j < mat.columnCount; j++) {
-			result.rows[i][j] = rows[i].Dot(transposed.rows[j]);
-		}
-	}
-	return result;
 }
 
 VecN Matrix::operator * (const VecN& vecN) const {
@@ -72,14 +58,30 @@ VecN Matrix::operator * (const VecN& vecN) const {
 	return result;
 }
 
-VecN Matrix::SolveGaussSeidel(const Matrix& A, const VecN& b) {
-	VecN X(b.componentNum);
+Matrix Matrix::operator * (const Matrix& mat) const {
+	if (mat.rowCount != columnCount && mat.columnCount != rowCount) {
+		return mat;
+	}
+
+	Matrix transposed = mat.Transpose();
+	Matrix result(rowCount, mat.columnCount);
+
+	for (int i = 0; i < rowCount; i++) {
+		for (int j = 0; j < mat.columnCount; j++) {
+			result.rows[i][j] = rows[i].Dot(transposed.rows[j]);
+		}
+	}
+	return result;
+}
+
+VecN Matrix::SolveGaussSeidel(const Matrix& mat, const VecN& vec) {
+	VecN X(vec.componentNum);
 	X.Zero();
 
-	for (int iterations = 0; iterations < b.componentNum; iterations++) {
-		for (int i = 0; i < b.componentNum; i++) {
-			float deltaX = (b[i] / A.rows[i][i]) - (A.rows[i].Dot(X) / A.rows[i][i]);
-			if (deltaX == deltaX) {//Avoids 'Not a Number' values
+	for (int j = 0; j < vec.componentNum; j++) {
+		for (int i = 0; i < vec.componentNum; i++) {
+			float deltaX = (vec[i] / mat.rows[i][i]) - (mat.rows[i].Dot(X) / mat.rows[i][i]);
+			if (!isnan(deltaX)) {
 				X[i] += deltaX;
 			}
 		}

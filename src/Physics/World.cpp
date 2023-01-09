@@ -57,7 +57,7 @@ void World::Update(float deltaTime) {
 		}
 	}
 
-	for (Body* body : bodies) {
+	for (auto& body : bodies) {
 		body->IntegrateForces(deltaTime);
 	}
 

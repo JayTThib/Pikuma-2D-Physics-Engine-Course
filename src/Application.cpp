@@ -177,7 +177,7 @@ void Application::InitWorld() {
 
 
 
-    /*
+    
     const int NUM_BODIES = 8;
     for (int i = 0; i < NUM_BODIES; i++) {
         float mass = (i == 0) ? 0.0f : 1.0f;
@@ -192,7 +192,7 @@ void Application::InitWorld() {
         JointConstraint* joint = new JointConstraint(a, b, a->position);
         world->AddConstraint(joint);
     }
-
+    /*
     Body* floor = new Body(BoxShape(Graphics::Width(), 20), Graphics::Width() / 2.0f, Graphics::Height(), 0.0f);
     world->AddBody(floor);
     Body* leftWall = new Body(BoxShape(20, Graphics::Height()), 0, Graphics::Height() / 2.0f, 0.0f);
@@ -202,8 +202,8 @@ void Application::InitWorld() {
     */
 
     // Add a static circle in the middle of the screen
-    Body* bigBall = new Body(CircleShape(64), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
-    world->AddBody(bigBall);
+    //Body* bigBall = new Body(CircleShape(64), Graphics::Width() / 2.0, Graphics::Height() / 2.0, 0.0);
+    //world->AddBody(bigBall);
 
     //Add a floor and walls to contain objects objects
     Body* floor = new Body(BoxShape(Graphics::Width() - 50, 50), Graphics::Width() / 2.0, Graphics::Height() - 50, 0.0);

@@ -41,6 +41,8 @@ struct PolygonShape : public Shape {
 	Vec2 EdgeAt(int index) const;
 	float FindMinSeparation(const PolygonShape* other, int& indexReferenceEdge, Vec2& supportPoint) const;
 	void UpdateVertices(float angle, const Vec2& position);
+	float PolygonArea() const;
+	Vec2 PolygonCentroid() const;
 	float GetMomentOfInertia() const override;
 	int FindIncidentEdge(const Vec2& referenceEdgeNormal) const;
 	int ClipSegmentToLine(const std::vector<Vec2>& contactsIn, std::vector<Vec2>& contactsOut, const Vec2& clip1, const Vec2& clip2) const;

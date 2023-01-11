@@ -42,9 +42,39 @@ Shape* PolygonShape::Clone() const {
 	return new PolygonShape(localVertices);
 }
 
+float PolygonShape::PolygonArea() const {
+	float area = 0.0;
+	for (int i = 0; i < localVertices.size(); i++) {
+		int j = (i + 1) % localVertices.size();
+		area += localVertices[i].Cross(localVertices[j]);
+	}
+	return area / 2.0;
+}
+
+Vec2 PolygonShape::PolygonCentroid() const {
+	Vec2 cg { 0,0 };
+
+	for (int i = 0; i < localVertices.size(); i++) {
+		int j = (i + 1) % localVertices.size();
+		cg += (localVertices[i] + localVertices[j]) * localVertices[i].Cross(localVertices[j]);
+	}
+	return cg / 6 / PolygonArea();
+}
+
 float PolygonShape::GetMomentOfInertia() const {
-	//TODO
-	return 5000.0f;
+	float acc0 = 0;
+	float acc1 = 0;
+
+	for (int i = 0; i < localVertices.size(); i++) {
+		auto a = localVertices[i];
+		auto b = localVertices[(i + 1) % localVertices.size()];
+		auto cross = abs(a.Cross(b));
+
+		acc0 += cross * (a.Dot(a) + b.Dot(b) + a.Dot(b));
+		acc1 += cross;
+	}
+
+	return acc0 / 6 / acc1;
 }
 
 Vec2 PolygonShape::EdgeAt(int index) const {

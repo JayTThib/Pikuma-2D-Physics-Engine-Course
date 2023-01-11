@@ -52,7 +52,7 @@ Vec2 PolygonShape::EdgeAt(int index) const {
 	return worldVertices[nextVertex] - worldVertices[index];
 }
 
-float PolygonShape::FindMinSeparation(const PolygonShape* other, Vec2& bestAxisOfPenetration, Vec2& vertexInOtherPolyWithMinProjection) const {
+float PolygonShape::FindMinSeparation(const PolygonShape* other, int& indexReferenceEdge, Vec2& supportPoint) const {
 	float separation = std::numeric_limits<float>::lowest();
 
 	for (int poly1Index = 0; poly1Index < this->worldVertices.size(); poly1Index++) {
@@ -75,8 +75,8 @@ float PolygonShape::FindMinSeparation(const PolygonShape* other, Vec2& bestAxisO
 
 		if (minSeparation > separation) {
 			separation = minSeparation;
-			bestAxisOfPenetration = this->EdgeAt(poly1Index);
-			vertexInOtherPolyWithMinProjection = minVertex;
+			indexReferenceEdge = poly1Index;
+			supportPoint = minVertex;
 		}
 	}
 
@@ -89,6 +89,53 @@ void PolygonShape::UpdateVertices(float angle, const Vec2& position) {
 		worldVertices[i] = localVertices[i].Rotate(angle);
 		worldVertices[i] += position;
 	}
+}
+
+int PolygonShape::FindIncidentEdge(const Vec2& referenceEdgeNormal) const {
+	int indexIncidentEdge = 0;
+	float minProjection = std::numeric_limits<float>::max();
+
+	for (int i = 0; i < this->worldVertices.size(); i++) {
+		Vec2 edgeNormal = this->EdgeAt(i).Normal();
+		float proj = edgeNormal.Dot(referenceEdgeNormal);
+
+		if (proj < minProjection) {
+			minProjection = proj;
+			indexIncidentEdge = i;
+		}
+	}
+
+	return indexIncidentEdge;
+}
+
+int PolygonShape::ClipSegmentToLine(const std::vector<Vec2>& contactsIn, std::vector<Vec2>& contactsOut, const Vec2& clip1, const Vec2& clip2) const {
+	int numOut = 0;
+	
+	//Calc the distance of end points to the line
+	Vec2 normal = (clip2 - clip1).Normalize();
+	float dist1 = (contactsIn[0] - clip1).Cross(normal);
+	float dist2 = (contactsIn[1] - clip1).Cross(normal);
+	
+	//If the points are behind the plane
+	if (dist1 <= 0) {
+		contactsOut[numOut++] = contactsIn[0];
+	}
+	if (dist2 <= 0) {
+		contactsOut[numOut++] = contactsIn[1];
+	}
+
+	//If the points are on different sides of the plane (one distance is negative and the other is positive)
+	if (dist1 * dist2 < 0) {
+		float totalDist = dist1 - dist2;
+
+		//Find the intersection using linear interpolation
+		float percent = dist1 / (totalDist);
+		Vec2 contact = contactsIn[0] + (contactsIn[1] - contactsIn[0]) * percent;
+		contactsOut[numOut] = contact;
+		numOut++;
+	}
+
+	return numOut;
 }
 
 BoxShape::BoxShape(float width, float height) {

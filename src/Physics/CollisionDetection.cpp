@@ -152,40 +152,92 @@ bool CollisionDetection::IsCollidingCirclePolygon(Body* circBody, Body* polyBody
 }
 
 bool CollisionDetection::IsCollidingPolygonPolygon(Body* body1, Body* body2, std::vector<Contact>& contacts) {
-	//Uses the Separating Axis Theorem (doesn't work with concave polygons)
-	const PolygonShape* poly1 = (PolygonShape*)body1->shape;
-	const PolygonShape* poly2 = (PolygonShape*)body2->shape;
-	Vec2 poly1BestAxisOfPenetration, poly2BestAxisOfPenetration, vertexInPoly2WithMinProjection, vertexInPoly1WithMinProjection;
-	float separationBetweenPoly1And2 = poly1->FindMinSeparation(poly2, poly1BestAxisOfPenetration, vertexInPoly2WithMinProjection);
+	//Reference edge is the original axis where the contact of best penetration was found.
+	//Incident edge is a face of the "other" rigidbody that is opposing the reference edge.
+
+	PolygonShape* poly1 = (PolygonShape*)body1->shape;
+	PolygonShape* poly2 = (PolygonShape*)body2->shape;
+
+	int indexReferenceEdge1, indexReferenceEdge2;
+	Vec2 supportPoint1, supportPoint2;
+	float separationBetweenPoly1And2 = poly1->FindMinSeparation(poly2, indexReferenceEdge1, supportPoint1);
 
 	if (separationBetweenPoly1And2 >= 0) {
 		return false;
 	}
 
-	float separationBetweenPoly2And1 = poly2->FindMinSeparation(poly1, poly2BestAxisOfPenetration, vertexInPoly1WithMinProjection);
+	float separationBetweenPoly2And1 = poly2->FindMinSeparation(poly1, indexReferenceEdge2, supportPoint2);
 	if (separationBetweenPoly2And1 >= 0) {
 		return false;
 	}
 	else{
-		Contact contact;
-		contact.body1 = body1;
-		contact.body2 = body2;
+		PolygonShape* referenceShape;
+		PolygonShape* incidentShape;
+		int indexReferenceEdge;
 
 		if (separationBetweenPoly1And2 > separationBetweenPoly2And1) {
-			
-			contact.depth = -separationBetweenPoly1And2;
-			contact.normal = poly1BestAxisOfPenetration.Normal();
-			contact.start = vertexInPoly2WithMinProjection;
-			contact.end = vertexInPoly2WithMinProjection + contact.normal * contact.depth;
+			referenceShape = poly1;
+			incidentShape = poly2;
+			indexReferenceEdge = indexReferenceEdge1;
 		}
 		else {
-			contact.depth = -separationBetweenPoly2And1;
-			contact.normal = -poly2BestAxisOfPenetration.Normal();
-			contact.start = vertexInPoly1WithMinProjection - contact.normal * contact.depth;
-			contact.end = vertexInPoly1WithMinProjection;
+			referenceShape = poly2;
+			incidentShape = poly1;
+			indexReferenceEdge = indexReferenceEdge2;
 		}
 
-		contacts.push_back(contact);
+		Vec2 referenceEdge = referenceShape->EdgeAt(indexReferenceEdge);
+
+		//The index of the point that's penetrating into the other object.
+		int incidentIndex = incidentShape->FindIncidentEdge(referenceEdge.Normal());
+		//The index of the point that isn't penetrating the other object, but is on the same edge as the point that is.
+		int incidentNextIndex = (incidentIndex + 1) % incidentShape->worldVertices.size();
+
+		Vec2 penetratingPoint = incidentShape->worldVertices[incidentIndex];
+		Vec2 nonpenetratingPoint = incidentShape->worldVertices[incidentNextIndex];
+
+		std::vector<Vec2> contactPoints = { penetratingPoint, nonpenetratingPoint };
+		std::vector<Vec2> clippedPoints = contactPoints;
+				
+		for (int i = 0; i < referenceShape->worldVertices.size(); i++) {
+			if (i == indexReferenceEdge) {
+				continue;
+			}
+
+			Vec2 clip1 = referenceShape->worldVertices[i];
+			Vec2 clip2 = referenceShape->worldVertices[(i + 1) % referenceShape->worldVertices.size()];
+			int numClipped = referenceShape->ClipSegmentToLine(contactPoints, clippedPoints, clip1, clip2);
+
+			if (numClipped > 2) {
+				break;
+			}
+
+			contactPoints = clippedPoints;
+		}
+
+		Vec2 vref = referenceShape->worldVertices[indexReferenceEdge];
+
+		//Loop all clipped points, but only consider those where separation is negative (objects are penetrating each other) 
+		for (Vec2& clippedVertex : clippedPoints) {
+			float separation = (clippedVertex - vref).Dot(referenceEdge.Normal());
+
+			if (separation <= 0) {
+				Contact contact;
+				contact.body1 = body1;
+				contact.body2 = body2;
+				contact.normal = referenceEdge.Normal();
+				contact.start = clippedVertex;
+				contact.end = clippedVertex + contact.normal * -separation;
+
+				if (separationBetweenPoly2And1 >= separationBetweenPoly1And2) {
+					std::swap(contact.start, contact.end);
+					contact.normal *= -1.0f;
+				}
+
+				contacts.push_back(contact);
+			}
+		}
+
 		return true;
 	}
 }

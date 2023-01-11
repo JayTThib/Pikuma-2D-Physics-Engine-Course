@@ -54,10 +54,19 @@ void Application::Input() {
             case SDL_MOUSEBUTTONDOWN:
                 int x, y;
                 SDL_GetMouseState(&x, &y);
+                /*
                 Body* circ = new Body(CircleShape(50), x, y, 1.0f);
                 circ->elasticity = 0.7f;
                 //circ->friction = 0.7f;
                 world->AddBody(circ);
+                */
+                Body* box = new Body(BoxShape(80, 80), x, y, 2.0f);
+                box->elasticity = 0.0f;
+                box->friction = 0.9f;
+                world->AddBody(box);
+
+
+
                 /*
                 int randNum = 1 + (rand() % 3);
                 if (randNum == 1) {
@@ -193,9 +202,12 @@ void Application::InitWorld() {
     Body* floor = new Body(BoxShape(Graphics::Width() - 50, 50), Graphics::Width() / 2.0, Graphics::Height() - 50, 0.0);
     Body* leftWall = new Body(BoxShape(50, Graphics::Height() - 100), 50, Graphics::Height() / 2.0 - 25, 0.0);
     Body* rightWall = new Body(BoxShape(50, Graphics::Height() - 100), Graphics::Width() - 50, Graphics::Height() / 2.0 - 25, 0.0);
-    floor->elasticity = 0.7;
-    leftWall->elasticity = 0.2;
-    rightWall->elasticity = 0.2;
+    floor->elasticity = 0.7f;
+    leftWall->elasticity = 0.2f;
+    rightWall->elasticity = 0.2f;
+    floor->friction = 0.9f;
+    leftWall->friction = 0.9f;
+    rightWall->friction = 0.9f;
     world->AddBody(floor);
     world->AddBody(leftWall);
     world->AddBody(rightWall);

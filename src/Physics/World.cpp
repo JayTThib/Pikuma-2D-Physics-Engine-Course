@@ -92,12 +92,14 @@ void World::Update(float deltaTime) {
 		constraint.PreSolve(deltaTime);
 	}
 
-	for (auto& constraint : constraints) {
-		constraint->Solve();
-	}
-	
-	for (auto& constraint : penetrations) {
-		constraint.Solve();
+	for (int i = 0; i < 5; i++) {//I arbitrarily picked 5 for the amount of collision interations. One would work just fine, but more iterations improves stability.
+		for (auto& constraint : constraints) {
+			constraint->Solve();
+		}
+
+		for (auto& constraint : penetrations) {
+			constraint.Solve();
+		}
 	}
 
 	for (auto& constraint : constraints) {

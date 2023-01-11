@@ -48,6 +48,12 @@ void Application::Input() {
                     bodies.clear();
                     */
                     //GenerateTerrain();
+                    int x, y;
+                    SDL_GetMouseState(&x, &y);
+                    Body* box = new Body(BoxShape(80, 80), x, y, 2.0f);
+                    box->elasticity = 0.0f;
+                    box->friction = 0.9f;
+                    world->AddBody(box);
                 }
                 break;
 
@@ -60,25 +66,26 @@ void Application::Input() {
                 //circ->friction = 0.7f;
                 world->AddBody(circ);
                 */
+                /*
                 Body* box = new Body(BoxShape(80, 80), x, y, 2.0f);
                 box->elasticity = 0.0f;
                 box->friction = 0.9f;
                 world->AddBody(box);
+                */
 
 
-
-                /*
+                
                 int randNum = 1 + (rand() % 3);
                 if (randNum == 1) {
                     Body* circ = new Body(CircleShape(50), x, y, 1.0f);
                     circ->elasticity = 0.7f;
-                    //circ->friction = 0.7f;
+                    circ->friction = 0.7f;
                     world->AddBody(circ);
                 }
                 else if (randNum == 2) {
                     Body* box = new Body(BoxShape(40, 40), x, y, 1.0f);
                     box->elasticity = 0.2f;
-                    //box->friction = 0.7f;
+                    box->friction = 0.7f;
                     world->AddBody(box);
                 }
                 else {
@@ -96,7 +103,7 @@ void Application::Input() {
                     world->AddBody(poly);
                     
                 }
-                */
+                
                 break;
         }
     }

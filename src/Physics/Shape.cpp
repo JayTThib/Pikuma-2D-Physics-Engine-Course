@@ -62,6 +62,9 @@ Vec2 PolygonShape::PolygonCentroid() const {
 }
 
 float PolygonShape::GetMomentOfInertia() const {
+	//https://stackoverflow.com/questions/41592034/computing-tensor-of-inertia-in-2d/41618980#41618980
+	//Split the polygon into triangles and handle each triangle separately. Then combine the results.
+
 	float acc0 = 0;
 	float acc1 = 0;
 
